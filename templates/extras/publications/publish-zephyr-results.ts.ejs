@@ -1,0 +1,18 @@
+/**
+ * Stub for Zephyr Scale/Jira Cloud result publish.
+ * Fill your org's base URL, project key, and API tokens.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import axios from "axios";
+
+async function main() {
+  const resultsPath = process.argv[2] || "allure-results";
+  const files = fs.readdirSync(resultsPath).filter(f => f.endsWith(".json"));
+  console.log(`Found ${files.length} test result files in ${resultsPath}`);
+
+  // TODO: transform Allure JSON to Zephyr payload and POST via axios
+  console.log("Posting to Zephyr... (stub)");
+}
+
+main().catch((e) => { console.error(e); process.exit(1); });

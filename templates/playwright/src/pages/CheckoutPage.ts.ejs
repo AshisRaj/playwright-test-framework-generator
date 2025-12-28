@@ -1,0 +1,133 @@
+/* eslint-disable playwright/no-raw-locators */
+import { BasePage } from '@pages';
+import { Page } from '@playwright/test';
+import { logger } from '@utils';
+
+export class CheckoutPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
+
+  // ---------- Page Elements ----------
+  elements = {
+    actionElements: {
+      cartLink: () => this.getByRole('link', { name: /cart/i }),
+      checkoutButton: () => this.getByRole('button', { name: /checkout/i }),
+      continueButton: () => this.getByRole('button', { name: /continue/i }),
+      finishButton: () => this.getByRole('button', { name: /finish/i }),
+      // Product card by visible name (on inventory detail page)
+      addToCartButton: () => this.getByRole('button', { name: /add to cart/i }),
+      backToProducts: () => this.getByRole('button', { name: /back to products/i }),
+    },
+
+    inputElements: {
+      firstName: () => this.getByPlaceholder('First Name'),
+      lastName: () => this.getByPlaceholder('Last Name'),
+      postalCode: () => this.getByPlaceholder('Zip/Postal Code'),
+    },
+
+    visualElements: {
+      // Section titles shown in checkout flow
+      titleYourInformation: () => this.getByText('Checkout: Your Information'),
+      titleOverview: () => this.getByText('Checkout: Overview'),
+      titleComplete: () => this.getByText('Checkout: Complete'),
+      // Generic error block on info step
+      errorMessage: () => this.locator("[data-test='error']"),
+      // Product tile link by name (on inventory list)
+      inventoryItemByName: (name: string) => this.getByRole('link', { name }),
+    },
+  };
+
+  // ---------- Page Actions ----------
+  actions = {
+    /** Add a single item by its visible name from the inventory list page. */
+    addItemByName: async (name: string): Promise<void> => {
+      const item = this.elements.visualElements.inventoryItemByName(name);
+      await this.click(item);
+      await this.click(this.elements.actionElements.addToCartButton());
+      // Go back to the list to allow chaining more selections
+      const back = this.elements.actionElements.backToProducts();
+      if (await back.isVisible().catch(() => false)) {
+        await this.click(back);
+      } else {
+        // fallback if Back to Products button not present
+        await this.goBack();
+      }
+    },
+
+    /** Add multiple items by their visible names. */
+    addItemsByName: async (names: string[]): Promise<void> => {
+      for (const n of names) {
+        await this.actions.addItemByName(n);
+      }
+    },
+
+    clickCheckout: async (): Promise<void> => {
+      await this.click(this.elements.actionElements.checkoutButton());
+    },
+
+    clickContinue: async (): Promise<void> => {
+      await this.click(this.elements.actionElements.continueButton());
+    },
+
+    /** Start the checkout flow from cart. Assumes user is logged in. */
+    startCheckout: async (): Promise<void> => {
+      await this.click(this.elements.actionElements.cartLink());
+      await this.click(this.elements.actionElements.checkoutButton());
+      await this.elements.visualElements.titleYourInformation().waitFor({ state: 'visible' });
+    },
+
+    /** Fill the "Your Information" form fields. */
+    fillYourInformation: async (first: string, last: string, postal: string): Promise<void> => {
+      logger.info(`${first} - ${last} - ${postal}`);
+      await this.fill(this.elements.inputElements.firstName(), first);
+      await this.fill(this.elements.inputElements.lastName(), last);
+      await this.fill(this.elements.inputElements.postalCode(), postal);
+    },
+
+    /** Continue to the Overview step. */
+    continueToOverview: async (): Promise<void> => {
+      await this.click(this.elements.actionElements.continueButton());
+      await this.elements.visualElements.titleOverview().waitFor({ state: 'visible' });
+    },
+
+    /** Finish the checkout on the Overview step. */
+    finishCheckout: async (): Promise<void> => {
+      await this.click(this.elements.actionElements.finishButton());
+      await this.elements.visualElements.titleComplete().waitFor({ state: 'visible' });
+    },
+  };
+
+  // ---------- High-level flows ----------
+  /**
+   * Complete purchase for provided data (assumes items already in cart).
+   */
+  async completeCheckout(first: string, last: string, postal: string): Promise<void> {
+    await this.actions.startCheckout();
+    await this.actions.fillYourInformation(first, last, postal);
+    await this.actions.continueToOverview();
+    await this.actions.finishCheckout();
+  }
+
+  /**
+   * Convenience: navigate to inventory page directly.
+   */
+  navigation = {
+    goToInventory: async (): Promise<void> => {
+      await this.navigateTo(process.env.APP_BASE_URL ? `${process.env.APP_BASE_URL}inventory.html` : 'https://www.saucedemo.com/inventory.html');
+    },
+    goToCart: async (): Promise<void> => {
+      await this.click(this.elements.actionElements.cartLink());
+    },
+  };
+
+  // ---------- Utilities ----------
+  /** Returns trimmed error text if visible on the info step. */
+  async getErrorText(): Promise<string> {
+    const el = this.elements.visualElements.errorMessage();
+    if (await el.isVisible().catch(() => false)) {
+      return (await el.textContent())?.trim() ?? '';
+    }
+    return '';
+  }
+}

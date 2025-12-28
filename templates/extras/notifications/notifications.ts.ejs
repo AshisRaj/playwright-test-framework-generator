@@ -1,0 +1,397 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * Stub for results notifications.
+ * Fill your org's base URL, project key, and API tokens into .env files.
+ */
+
+import { IncomingWebhook } from '@slack/webhook';
+import {
+  ARTIFACTS_DIR,
+  ENVIRONMENTS_DIR,
+  FIRST_SCREENSHOT_PATH,
+  logger,
+  <% if (reporter === "monocart") { %>
+  MONOCART_REPORT_DIR,
+  MONOCART_REPORT_PATH,
+  <% } else if (reporter === "allure") { %>
+    ALLURE_REPORT_DIR,
+    ALLURE_REPORT_PATH,
+    SECOND_SCREENSHOT_PATH,
+  <% } else if (reporter === "html") { %>
+  HTML_REPORTS_DIR,
+  HTML_REPORTS_PATH,
+  <% } %>
+  ZIP_FILE_PATH,
+} from '@utils';
+import AdmZip from 'adm-zip';
+import { ArgumentParser } from 'argparse';
+import axios from 'axios';
+import dotenv from 'dotenv';
+import { promises as fs } from 'fs';
+import nodemailer from 'nodemailer';
+import path from 'path';
+import { chromium } from 'playwright';
+
+export async function zipTestReport(): Promise<void> {
+  const zip = new AdmZip();
+  const files = await fs.readdir(<% if (reporter === "monocart") { %>MONOCART_REPORT_DIR<% } else if (reporter === "allure") { %>ALLURE_REPORT_DIR<% } else { %>HTML_REPORTS_DIR<% } %>);
+  files.forEach((file) => {
+    const filePath = path.join(<% if (reporter === "monocart") { %>MONOCART_REPORT_DIR<% } else if (reporter === "allure") { %>ALLURE_REPORT_DIR<% } else { %>HTML_REPORTS_DIR<% } %>, file);
+    zip.addLocalFile(filePath);
+  });
+  zip.writeZip(ZIP_FILE_PATH);
+}
+
+export async function takeScreenshot(): Promise<void> {
+  const browser = await chromium.launch({
+    channel: 'chrome',
+    headless: true,
+  });
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto(`file://${<% if (reporter === "monocart") { %>MONOCART_REPORT_PATH <% } else if (reporter === "allure") { %>ALLURE_REPORT_PATH<% } else { %>HTML_REPORTS_PATH<% } %>}`);
+  // eslint-disable-next-line playwright/no-wait-for-timeout
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: FIRST_SCREENSHOT_PATH });
+  <% if (reporter === "allure") { %>
+  await page.getByRole('link', { name: ' Suites' }).click();
+  // eslint-disable-next-line playwright/no-wait-for-timeout
+  await page.waitForTimeout(2000);
+  await page.screenshot({ path: SECOND_SCREENSHOT_PATH });
+  <% } %>
+  await browser.close();
+}
+
+/**
+ * Generates the email subject line for the test report.
+ * @param summaryData
+ * @returns
+ */
+export async function generateReportSubject(summaryData?: any): Promise<string> {
+  return `${process.env.PROJECT_NAME}::Test Report (Env: ${summaryData?.env}, Status: ${summaryData?.status}, Branch: ${summaryData?.branch}, Date: ${summaryData?.date})`;
+}
+
+/**
+ * Generates the email body for the test report.
+ * @param summaryData
+ * @returns
+ */
+export async function generateReportBody(summaryData?: any): Promise<string> {
+  return `
+      <html>
+      <head>
+        <style>
+          table { width: 60%; border-collapse: collapse; }
+          th, td { border: 1px solid black; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <p>Automated Test Report for ${summaryData?.date ?? new Date().toISOString()}</p>
+        <p>Please find the attached Test Report.</p>
+        <table>
+          <tr><th>Environment</th><td>${summaryData.env}</td></tr>
+          <tr><th>Host</th><td>${summaryData.hostname}</td></tr>
+          <tr><th>User</th><td>${summaryData.user}</td></tr>
+          <tr><th>Operating System</th><td>${summaryData.os_name}</td></tr>
+          <tr><th>Branch</th><td>${summaryData.branch}</td></tr>
+          <tr><th>Node Version</th><td>${summaryData.node_version}</td></tr>
+          <tr><th>Duration</th><td>${summaryData.durationHS}</td></tr>
+        </table>
+        <h3>Test Results:</h3>
+        <table>
+          <tr>
+            <th>Total Tests</th>
+            <th>Passed</th>
+            <th>Failed</th>
+            <th>Skipped</th>
+          </tr>
+          <tr>
+            <td>${summaryData.total}</td>
+            <td>${summaryData.passed}</td>
+            <td>${summaryData.failed}</td>
+            <td>${summaryData.skipped}</td>
+          </tr>
+        </table>
+        <h3>Screenshots:</h3>
+        <p><img src="cid:image1" alt="Screenshot 1"></p>
+        <% if (reporter === "allure") { %>
+        <p><img src="cid:image2" alt="Screenshot 2"></p>
+        <% } %>
+        <p>Regards,<br>${process.env.PROJECT_NAME} (${summaryData.user})</p>
+      </body>
+      </html>
+    `;
+}
+
+/** Parses command-line arguments for notification settings.
+ * @returns Parsed arguments object.
+ */
+export function parseArguments(): any {
+  const parser = new ArgumentParser({
+    description: 'Email Utility for sending test reports',
+  });
+
+  parser.add_argument('--env', {
+    required: false,
+    default: 'False',
+    help: 'Provide environment details',
+    choices: ['qa', 'dev', 'staging', 'uat'],
+  });
+  parser.add_argument('--email', {
+    required: false,
+    default: 'False',
+    choices: ['True', 'False'],
+    help: 'Send email notification',
+  });
+  parser.add_argument('--slack', {
+    required: false,
+    default: 'False',
+    choices: ['True', 'False'],
+    help: 'Send slack notification',
+  });
+  parser.add_argument('--teams', {
+    required: false,
+    default: 'False',
+    choices: ['True', 'False'],
+    help: 'Send teams notification',
+  });
+  parser.add_argument('--branch', { required: false, help: 'Provide branch name' });
+  parser.add_argument('--folder_path', { required: false, help: 'Provide folder path' });
+
+  return parser.parse_args();
+}
+
+/**
+ * Reads the custom summary JSON file from the artifacts directory.
+ * @returns Parsed JSON object or null if the file is not found or unreadable.
+ */
+export async function readCustomSummary(): Promise<any | null> {
+  try {
+    const filePath = path.resolve(ARTIFACTS_DIR, 'custom-summary.json');
+    const content = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(content);
+  } catch (err: any) {
+    logger.warn('custom-summary.json not found or unreadable:', err?.message ?? String(err));
+    return null;
+  }
+}
+
+/**
+ * Sends notifications via Email, Slack, and Teams based on the provided summary.
+ * @param summary
+ * @returns
+ */
+export async function sendNotifications(args: any, summary: any) {
+  const mergedSummary = {
+    status: summary?.status ?? summary?.status ?? 'Unknown',
+    total: summary?.total ?? summary?.total ?? 0,
+    passed: summary?.passed ?? summary?.passed ?? 0,
+    failed: summary?.failed ?? summary?.failed ?? 0,
+    skipped: summary?.skipped ?? summary?.skipped ?? 0,
+    durationMs: summary?.durationMs ?? summary?.durationMs ?? 0,
+    durationHS: summary?.durationHS ?? summary?.durationHS ?? '0s',
+    env: summary?.env ?? process.env.ENV ?? '',
+    branch: summary?.branch ?? process.env.BRANCH ?? '',
+    hostname: summary?.hostname ?? summary?.host ?? '',
+    os_name: summary?.os_name ?? summary?.os_name ?? summary?.platform ?? '',
+    user: summary?.user ?? summary?.user_id ?? '',
+    node_version: summary?.node_version ?? process.version,
+    date: summary?.date ?? new Date().toISOString(),
+  };
+
+  // EMAIL
+  if (process.env.NOTIFY_EMAIL === 'true' || args.email.toLowerCase() === 'true') {
+    // Prefer explicit SMTP settings via env vars to avoid accidental attempts to connect
+    // to services without valid credentials (which can cause EHOSTUNREACH or other errors).
+    const smtpHost = process.env.SMTP_HOST;
+    const smtpPort = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : undefined;
+    const smtpSecure =
+      process.env.SMTP_SECURE === 'true' || (smtpPort !== undefined && smtpPort === 465);
+
+    if (!smtpHost || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      logger.warn(
+        '⚠️ Email not sent: missing SMTP configuration. Set SMTP_HOST, SMTP_PORT, SMTP_USER and SMTP_PASS in your .env to enable email notifications.',
+      );
+    } else {
+      const transportOptions: any = {
+        host: smtpHost,
+        port: smtpPort ?? 587,
+        secure: smtpSecure,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      };
+
+      // optional: allow insecure TLS in some corporate environments (opt-in)
+      if (process.env.SMTP_TLS_REJECT_UNAUTHORIZED === 'false') {
+        transportOptions.tls = { rejectUnauthorized: false };
+      }
+
+      const message = {
+        from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+        to: process.env.EMAIL_TO || process.env.SMTP_USER,
+        cc: process.env.EMAIL_CC || undefined,
+        bcc: process.env.EMAIL_BCC || undefined,
+        subject: process.env.EMAIL_SUB || `${await generateReportSubject(mergedSummary)}`,
+        html: await generateReportBody(mergedSummary),
+        attachments: [
+          {
+            filename: path.basename(ZIP_FILE_PATH),
+            path: ZIP_FILE_PATH,
+          },
+          {
+            filename: path.basename(FIRST_SCREENSHOT_PATH),
+            path: FIRST_SCREENSHOT_PATH,
+            cid: 'image1',
+          },
+          <% if (reporter === "allure") { %>
+          {
+           filename: path.basename(SECOND_SCREENSHOT_PATH),
+           path: SECOND_SCREENSHOT_PATH,
+           cid: 'image2',
+          },
+          <% } %>
+        ],
+      };
+
+      const transporter = nodemailer.createTransport(transportOptions);
+
+      await transporter
+        .sendMail(message)
+        .then((info) => {
+          logger.log('✉️ Email sent:', info.messageId);
+        })
+        .catch((emailErr) => {
+          logger.error('❌ Email error:', emailErr);
+        });
+    }
+  } else {
+    logger.info('Email notification is disabled');
+  }
+
+  // SLACK
+  if (process.env.NOTIFY_SLACK === 'true' || args.slack.toLowerCase() === 'true') {
+    const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+    if (!slackWebhookUrl) {
+      logger.warn('⚠️ Slack not sent: missing SLACK_WEBHOOK_URL in environment.');
+    } else {
+      const webhook = new IncomingWebhook(slackWebhookUrl);
+
+      // Build a monospace table for Slack (displayed inside a code block)
+      const slackRows = [
+        ['Metric', 'Value'],
+        ['Total Tests', String(mergedSummary.total)],
+        ['Passed', String(mergedSummary.passed)],
+        ['Failed', String(mergedSummary.failed)],
+        ['Skipped', String(mergedSummary.skipped)],
+        ['Duration', String(mergedSummary.durationHS)],
+        ['Status', String(mergedSummary.status)],
+        ['Branch', String(mergedSummary.branch)],
+        ['Env', String(mergedSummary.env)],
+      ];
+      const col1Width = Math.max(...slackRows.map((r) => r[0].length));
+      const col2Width = Math.max(...slackRows.map((r) => r[1].length));
+      const slackTable =
+        '```\n' +
+        slackRows.map((r) => `${r[0].padEnd(col1Width)} | ${r[1].padEnd(col2Width)}`).join('\n') +
+        '\n```';
+
+      const subject = await generateReportSubject(mergedSummary);
+      const message = {
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `*${subject}*`,
+            },
+          },
+          {
+            type: 'divider',
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: slackTable,
+            },
+          },
+        ],
+      };
+
+      if (mergedSummary.total > 0 && mergedSummary.passed === mergedSummary.total) {
+        message.blocks.push({
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '✔ Congratulations! All tests passed.',
+          },
+        });
+      }
+      webhook
+        .send(message)
+        .then(() => {
+          logger.info('💬 Slack sent');
+        })
+        .catch((slackErr) => {
+          logger.error('❌ Slack error:', slackErr);
+        });
+    }
+  } else {
+    logger.info('Slack notification is disabled');
+  }
+
+  // TEAMS
+  if (process.env.NOTIFY_TEAMS === 'true' || args.teams.toLowerCase() === 'true') {
+    try {
+      await axios.post(process.env.TEAMS_WEBHOOK_URL!, {
+        '@type': 'MessageCard',
+        '@context': 'http://schema.org/extensions',
+        themeColor: '0076D7',
+        summary: 'Playwright Test Summary',
+        sections: [
+          {
+            activityTitle: 'Playwright Test Summary',
+            text:
+              `**Status:** ${mergedSummary.status}\n\n` +
+              `**Passed:** ${mergedSummary.passed}\n\n` +
+              `**Failed:** ${mergedSummary.failed}\n\n` +
+              `**Duration:** ${mergedSummary.durationHS}`,
+          },
+        ],
+      });
+
+      logger.info('💼 Teams sent');
+    } catch (err) {
+      logger.error('❌ Teams error:', err);
+    }
+  } else {
+    logger.info('Teams notification is disabled');
+  }
+}
+
+/**
+ * Main execution
+ */
+await (async () => {
+  // Always resolve paths from the generated project's config file location
+
+  // Load the appropriate .env file based on the ENV variable
+  const ENV = (process.env.ENV || 'uat').toLowerCase();
+  const dotEnvPath = path.resolve(ENVIRONMENTS_DIR, `.env.${ENV}`);
+  dotenv.config({ path: dotEnvPath });
+  const args = parseArguments();
+  // Try to read a local custom summary file
+  const summary = (await readCustomSummary()) || {};
+  await zipTestReport().catch((err) => {
+    logger.error('Error zipping test report:', err);
+  });
+  await takeScreenshot().catch((err) => {
+    logger.error('Error taking screenshots:', err);
+  });
+  await sendNotifications(args, summary).catch((err) => {
+    logger.error('Error sending notifications:', err);
+  });
+})();

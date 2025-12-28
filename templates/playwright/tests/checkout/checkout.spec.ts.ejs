@@ -1,0 +1,139 @@
+import { checkoutData } from '@data';
+import { expect, test } from '@fixtures';
+
+test.describe('Checkout form (valid cases)', () => {
+  for (const row of checkoutData.valid) {
+    test(
+      `checks out successfully: ${row.firstName} ${row.lastName}`,
+      { tag: ['@smoke', '@regression'] },
+      async ({ page, inventoryPage, cartPage, checkoutPage }) => {
+        await test.step('Navigate to dashboard', async () => {
+          await inventoryPage.navigation.goToInventoryPage();
+          await expect(page.getByText('Products')).toBeVisible();
+        });
+
+        await test.step('Add an item to cart', async () => {
+          await inventoryPage.actions.clickAddToCartButton('sauce-labs-backpack'); // Use specific item ID
+        });
+
+        await test.step('Click on cart icon', async () => {
+          await inventoryPage.actions.clickShoppingCartLink();
+        });
+
+        await test.step('Verify cart page is displayed', async () => {
+          await expect(cartPage.elements.visualElements.cartTitle()).toBeVisible();
+          await expect(cartPage.elements.visualElements.cartTitle()).toHaveText('Your Cart');
+        });
+
+        await test.step('Click on Checkout button', async () => {
+          await checkoutPage.actions.clickCheckout();
+        });
+
+        await test.step('Fill checkout form', async () => {
+          await checkoutPage.actions.fillYourInformation(
+            row.firstName,
+            row.lastName,
+            row.postalCode,
+          );
+        });
+
+        await test.step('Click on Continue button', async () => {
+          await checkoutPage.actions.continueToOverview();
+        });
+      },
+    );
+  }
+});
+
+test.describe('Checkout form (valid cases - via data fixture)', () => {
+  test(
+    `checks out successfully`,
+    { tag: ['@smoke', '@regression'] },
+    async ({ page, inventoryPage, cartPage, checkoutPage, checkoutData }) => {
+      const checkoutData1stValid = checkoutData.valid[0];
+      await test.step('Navigate to dashboard', async () => {
+        await inventoryPage.navigation.goToInventoryPage();
+        await expect(page.getByText('Products')).toBeVisible();
+      });
+
+      await test.step('Add an item to cart', async () => {
+        await inventoryPage.actions.clickAddToCartButton('sauce-labs-backpack'); // Use specific item ID
+      });
+
+      await test.step('Click on cart icon', async () => {
+        await inventoryPage.actions.clickShoppingCartLink();
+      });
+
+      await test.step('Verify cart page is displayed', async () => {
+        await expect(cartPage.elements.visualElements.cartTitle()).toBeVisible();
+        await expect(cartPage.elements.visualElements.cartTitle()).toHaveText('Your Cart');
+      });
+
+      await test.step('Click on Checkout button', async () => {
+        await checkoutPage.actions.clickCheckout();
+      });
+
+      await test.step('Fill checkout form', async () => {
+        await checkoutPage.actions.fillYourInformation(
+          checkoutData1stValid.firstName,
+          checkoutData1stValid.lastName,
+          checkoutData1stValid.postalCode,
+        );
+      });
+
+      await test.step('Click on Continue button', async () => {
+        await checkoutPage.actions.continueToOverview();
+      });
+    },
+  );
+});
+
+test.describe('Checkout form (negative cases)', () => {
+  for (const row of checkoutData.invalid) {
+    test(
+      `shows error: ${row.reason}`,
+      { tag: ['@smoke', '@regression'] },
+      async ({ page, inventoryPage, cartPage, checkoutPage }) => {
+        await test.step('Navigate to dashboard', async () => {
+          await inventoryPage.navigation.goToInventoryPage();
+          await expect(page.getByText('Products')).toBeVisible();
+        });
+
+        await test.step('Add an item to cart', async () => {
+          await inventoryPage.actions.clickAddToCartButton('sauce-labs-backpack'); // Use specific item ID
+        });
+
+        await test.step('Click on cart icon', async () => {
+          await inventoryPage.actions.clickShoppingCartLink();
+        });
+
+        await test.step('Verify cart page is displayed', async () => {
+          await expect(cartPage.elements.visualElements.cartTitle()).toBeVisible();
+          await expect(cartPage.elements.visualElements.cartTitle()).toHaveText('Your Cart');
+        });
+
+        await test.step('Click on Checkout button', async () => {
+          await checkoutPage.actions.clickCheckout();
+        });
+
+        await test.step('Fill checkout form', async () => {
+          await checkoutPage.actions.fillYourInformation(
+            row.firstName,
+            row.lastName,
+            row.postalCode,
+          );
+        });
+
+        await test.step('Click on Continue button', async () => {
+          await checkoutPage.actions.clickContinue();
+        });
+        // Generic validation (Sauce Demo shows specific messages for empty fields)
+        await expect(
+          checkoutPage.getByText(
+            /Error|First Name is required|Last Name is required|Postal Code is required/i,
+          ),
+        ).toBeVisible();
+      },
+    );
+  }
+});

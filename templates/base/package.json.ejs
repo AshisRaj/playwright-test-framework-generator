@@ -1,0 +1,21 @@
+{
+  "name": "playwright-e2e-framework",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "run": "tsx src/utils/test-runner.ts",
+    "run:ui": "tsx src/utils/test-runner.ts --ui",
+    "run:headed": "tsx src/utils/test-runner.ts --headed",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "codegen": "playwright codegen",
+    "fmt": "prettier -w . --ignore-pattern .prettierignore",
+    "lint": "eslint . --fix --max-warnings 0 --no-cache",
+    "syntax-check": "tsc --noEmit",
+    "logs:clean": "rimraf artifacts/logs"<% if (notifications === true) { %>,
+    "notify-report:uat": "tsx src/tools/notifications/notifications.ts --env uat --email True --slack True",
+    "run-and-notify:uat": "npm run run:headed && npm run notify-report:uat"
+    <% } %>
+  }
+}

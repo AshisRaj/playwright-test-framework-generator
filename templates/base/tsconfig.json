@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@pages": ["src/pages/index.ts"],
+      "@utils": ["src/utils/index.ts"],
+      "@fixtures": ["src/fixtures/index.ts"],
+      "@data": ["src/data/index.ts"],
+      "@configs": ["src/configs/index.ts"],
+      "@services": ["src/services/index.ts"]
+    }
+  }
+}

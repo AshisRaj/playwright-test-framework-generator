@@ -1,0 +1,342 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { expect, Frame, FrameLocator, Locator, Page } from '@playwright/test';
+import { logger } from '@utils';
+
+/**
+ * BasePage
+ * --------
+ * Lightweight base class for Playwright Page Objects.
+ * - Keeps your original behavior intact.
+ * - Only reorganizes method groups and adds documentation.
+ * - No opinionated retries/auto-waits added here (keep tests predictable).
+ */
+export abstract class BasePage {
+  /** Underlying Playwright Page. */
+  private page: Page;
+
+  constructor(page: Page) {
+    this.page = page;
+  }
+
+  // ============================================================
+  // LOCATOR HELPERS
+  // ------------------------------------------------------------
+  // Canonical entry points for querying elements on the page.
+  // Prefer role/test-id/text queries over raw CSS where possible.
+  // ============================================================
+
+  /**
+   * Wraps page.getByRole for easy access.
+   */
+  getByRole(
+    role: Parameters<Page['getByRole']>[0],
+    options?: Parameters<Page['getByRole']>[1],
+  ): Locator {
+    return this.page.getByRole(role, options);
+  }
+
+  /**
+   * Wraps page.getByPlaceholder for easy access.
+   */
+  getByPlaceholder(
+    placeholder: string,
+    options?: Parameters<Page['getByPlaceholder']>[1],
+  ): Locator {
+    return this.page.getByPlaceholder(placeholder, options);
+  }
+
+  /**
+   * Wraps page.getByText for consistent usage.
+   */
+  getByText(text: string | RegExp, options?: Parameters<Page['getByText']>[1]): Locator {
+    return this.page.getByText(text, options);
+  }
+
+  /**
+   * Returns a locator for an element by its test ID.
+   * @param testId The test ID.
+   */
+  getByTestId(testId: string): Locator {
+    return this.page.getByTestId(testId);
+  }
+
+  /**
+   * Raw locator escape hatch; prefer role/testId/text when possible.
+   */
+  locator(selector: string, options?: { hasText?: string }): Locator {
+    return this.page.locator(selector, options);
+  }
+
+  // ============================================================
+  // NAVIGATION & PAGE-LEVEL STATE
+  // ------------------------------------------------------------
+  // Helpers for moving around and validating page-level conditions.
+  // ============================================================
+
+  /**
+   * Navigates to the specified URL.
+   * @param url The URL to navigate to.
+   */
+  async navigateTo(url: string): Promise<void> {
+    await this.page.goto(url, { waitUntil: 'load' });
+  }
+
+  /**
+   * Waits for the page URL to contain/match the given value.
+   * @param urlPart Substring or RegExp to match in the URL.
+   * @param timeout Timeout in ms (default: 5000).
+   */
+  async waitForUrl(urlPart: string | RegExp, timeout = 5000): Promise<void> {
+    await expect(this.page).toHaveURL(new RegExp(urlPart), { timeout });
+  }
+
+  /**
+   * Waits until document.title matches the expected value.
+   * @param title String or RegExp expected in the title.
+   * @param timeout Timeout in ms (default: 5000).
+   */
+  async waitForTitle(title: string | RegExp, timeout = 5000): Promise<void> {
+    await expect(this.page).toHaveTitle(title, { timeout });
+  }
+
+  /**
+   * Navigate back in browser history.
+   */
+  async goBack(): Promise<void> {
+    await this.page.goBack();
+  }
+
+  // ============================================================
+  // WAIT/ASSERTION HELPERS (ELEMENT SCOPE)
+  // ------------------------------------------------------------
+  // Thin wrappers around expect-based visibility/hidden checks.
+  // ============================================================
+
+  /**
+   * Checks if a target element is visible.
+   * @param target A CSS selector or Locator.
+   */
+  async isVisible(target: string | Locator): Promise<boolean> {
+    const element = typeof target === 'string' ? this.page.locator(target) : target;
+    const visible = await element.isVisible();
+    return visible;
+  }
+
+  /**
+   * Waits for a target element to become visible.
+   * @param target A CSS selector or Locator.
+   * @param timeout Optional timeout in milliseconds (default: 5000).
+   */
+  async waitForVisible(target: string | Locator, timeout = 5000): Promise<void> {
+    const element = typeof target === 'string' ? this.page.locator(target) : target;
+    await expect(element).toBeVisible({ timeout });
+  }
+
+  /**
+   * Wait until a specific element is hidden.
+   */
+  async waitForHidden(element: Locator): Promise<void> {
+    await expect(element).toBeHidden();
+  }
+
+  // ============================================================
+  // ACTION HELPERS (ELEMENT INTERACTIONS)
+  // ------------------------------------------------------------
+  // Minimal wrappers for common user gestures.
+  // ============================================================
+
+  /**
+   * Consistent fill operation with trace logging.
+   */
+  protected async fill(target: string | Locator, value: string): Promise<void> {
+    const element = typeof target === 'string' ? this.page.locator(target) : target;
+    await element.fill(value);
+  }
+
+  /**
+   * Click with auto-wait and trace logging.
+   */
+  async click(target: string | Locator): Promise<void> {
+    const element = typeof target === 'string' ? this.page.locator(target) : target;
+    await element.click();
+  }
+
+  /**
+   * Press a keyboard key within an element.
+   */
+  async press(element: Locator, key: string): Promise<void> {
+    await element.press(key);
+  }
+
+  // ============================================================
+  // FRAME HELPERS
+  // ------------------------------------------------------------
+  // Utilities for working with iframes and nested frames.
+  // ============================================================
+
+  /**
+   * Retrieves a frame by its name.
+   * @param name The name of the frame.
+   * @throws If the frame is not found.
+   */
+  async getFrameByName(name: string): Promise<Frame> {
+    const frame = this.page.frame({ name: name });
+    if (!frame) throw new Error(`Frame with name "${name}" not found`);
+    return frame;
+  }
+
+  /**
+   * Retrieves a frame whose URL contains the specified substring.
+   * @param urlPart A substring of the frame's URL.
+   * @throws If the frame is not found.
+   */
+  async getFrameByUrlPart(urlPart: string): Promise<Frame> {
+    const frame = this.page.frames().find((f) => f.url().includes(urlPart));
+    if (!frame) throw new Error(`Frame with url containing "${urlPart}" not found`);
+    return frame;
+  }
+
+  /**
+   * Returns a frame locator by frame name.
+   * @param name The name of the iframe.
+   * @note Declared async in original code; returns a FrameLocator directly.
+   */
+  async frameLocatorByName(name: string): Promise<FrameLocator> {
+    return this.page.frameLocator(`iframe[name="${name}"]`);
+  }
+
+  /**
+   * Retrieves a nested child frame by parent and child frame names.
+   * @param parentName The name of the parent frame.
+   * @param childName The name of the child frame.
+   * @throws If the child frame is not found.
+   */
+  async getNestedFrame(parentName: string, childName: string): Promise<Frame> {
+    const parent = await this.getFrameByName(parentName);
+    const child = parent.childFrames().find((f) => f.name() === childName);
+    if (!child) throw new Error(`Child frame "${childName}" not found in parent "${parentName}"`);
+    return child;
+  }
+
+  /**
+   * Retrieves the inner text of the body element from a specified frame.
+   * @param frameName The name of the frame.
+   */
+  async getTextFromFrame(frameName: string): Promise<string> {
+    const frame = await this.getFrameByName(frameName);
+    // For demo, get the body text
+    // eslint-disable-next-line playwright/no-raw-locators
+    return frame.locator('body').innerText();
+  }
+
+  // ============================================================
+  // FORM/CONTROL HELPERS (SELECTS/CHECKBOXES)
+  // ------------------------------------------------------------
+  // Small conveniences for common form widgets.
+  // ============================================================
+
+  /**
+   * Selects an option from a dropdown by its visible label.
+   * @param locator The Locator of the select element.
+   * @param value The label of the option to select.
+   */
+  async selectOption(locator: Locator, value: string) {
+    await locator.selectOption({ label: value });
+  }
+
+  /**
+   * Toggles a checkbox based on a boolean string value.
+   * @param locator The Locator of the checkbox.
+   * @param value A string representing the desired state ('true' or 'false').
+   */
+  async toggleCheckbox(locator: Locator, value: string) {
+    const shouldCheck = value.toLowerCase() === 'true';
+    if ((await locator.isChecked()) !== shouldCheck) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      shouldCheck ? await locator.check() : await locator.uncheck();
+    }
+  }
+
+  // ============================================================
+  // DIALOG/ALERT HELPERS
+  // ------------------------------------------------------------
+  // One-shot acceptance while performing a triggering action.
+  // ============================================================
+
+  async acceptAlertAndClick(locator: string) {
+    // Pre: remove/cleanup all previous registered dialog listeners
+    this.page.removeAllListeners('dialog');
+
+    let dialogCount = 0;
+
+    this.page.once('dialog', async (dialog) => {
+      dialogCount++;
+
+      logger.info(`Dialog #${dialogCount}: ${dialog.message()}`);
+
+      await dialog.accept();
+    });
+
+    await this.locator(locator).click();
+  }
+
+  // ============================================================
+  // RETRY & READINESS HELPERS
+  // ------------------------------------------------------------
+  // Generic retry wrapper and element readiness utilities.
+  // ============================================================
+
+  async retry<T>(fn: () => Promise<T>, retries = 3, delay = 1000): Promise<T> {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        return await fn();
+      } catch (error) {
+        if (attempt === retries) throw error;
+        await new Promise((res) => setTimeout(res, delay));
+      }
+    }
+    throw new Error('Retry failed');
+  }
+
+  /**
+   * Waits for an element to be visible and enabled.
+   * Retries the check body to avoid transient timing edges.
+   */
+  async waitForElementToBeReady(element: Locator, timeout = 5000) {
+    await this.retry(async () => {
+      await element.waitFor({ state: 'visible', timeout });
+      await expect(element).toBeEnabled();
+    });
+  }
+
+  /**
+   * Waits for an element to be detached and/or hidden.
+   * Retries the check body to avoid transient timing edges.
+   */
+  async waitForElementToBeHidden(element: Locator, timeout = 5000) {
+    await this.retry(async () => {
+      await element.waitFor({ state: 'detached', timeout });
+      await expect(element).toBeHidden();
+    });
+  }
+
+  // ============================================================
+  // MISC UTILS (TITLE/SCREENSHOT)
+  // ------------------------------------------------------------
+  // Generic utilities that are commonly reused across pages.
+  // ============================================================
+
+  /**
+   * Get page title text.
+   */
+  async getTitle(): Promise<string> {
+    return this.page.title();
+  }
+
+  /**
+   * Take a screenshot (optional path).
+   */
+  async takeScreenshot(path = 'artifacts/screenshots/screenshot.png'): Promise<void> {
+    await this.page.screenshot({ path, fullPage: true });
+  }
+}

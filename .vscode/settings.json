@@ -1,0 +1,38 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit"
+  },
+
+  // Prettier as default formatter (respects .editorconfig and .prettierrc)
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[json]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+  "[markdown]": { "editor.defaultFormatter": "esbenp.prettier-vscode" },
+
+  "prettier.useEditorConfig": true,
+  "prettier.requireConfig": false,
+
+  // Keep files consistent with .editorconfig
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // ESLint (flat config, v9+)
+  "eslint.enable": true,
+  "eslint.useFlatConfig": true,
+  "eslint.validate": ["javascript", "typescript"],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+
+  // Hide heavy artifacts from search/explorer
+  "search.exclude": {
+    "node_modules": true,
+    "dist": true
+  },
+  "files.exclude": {
+    "dist": true
+  },
+  "cSpell.words": ["codegen", "kolorist", "monocart", "nohusky", "xenv"]
+}

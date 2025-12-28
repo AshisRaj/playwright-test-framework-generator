@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+msgFile=$1
+msg=$(cat "$msgFile")
+if [ ${#msg} -lt 5 ]; then
+  echo "Commit message too short" >&2
+  exit 1
+fi

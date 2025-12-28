@@ -1,0 +1,15 @@
+stages: [test]
+playwright:
+  image: mcr.microsoft.com/playwright:v1.47.2-jammy
+  stage: test
+  script:
+    - npm i
+    - npm test
+  artifacts:
+    when: always
+    paths:
+    <% if (reporter === "monocart") { %>
+      - artifacts/reports/monocart-report
+    <% } else if (reporter === "allure") { %>
+      - artifacts/reports/allure-results/
+    <% } %>

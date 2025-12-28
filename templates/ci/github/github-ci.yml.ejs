@@ -1,0 +1,26 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm i
+      - run: npx playwright install --with-deps
+      - run: npm test
+      <% if (reporter === "monocart") { %>
+      - name: Archive Monocart Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: monocart-report
+          path: artifacts/reports/monocart-report
+      <% } else if (reporter === "allure") { %>
+      - name: Archive Allure Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: artifacts/reports/allure-results
+      <% } %>

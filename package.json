@@ -1,0 +1,49 @@
+{
+  "name": "playwright-test-framework-generator",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "playwright-test-framework-generator": "./bin/cli.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "templates",
+    "README.md",
+    "USAGE.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w",
+    "prepublishOnly": "npm run build",
+    "test": "npx vitest",
+    "report": "npx vite preview --outDir html"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "ejs": "^3.1.10",
+    "inquirer": "^12.0.1",
+    "kolorist": "^1.8.0",
+    "ora": "^8.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/ejs": "^3.1.5",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.5.0",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^9.1.0",
+    "execa": "^9.6.0",
+    "fs-extra": "^11.3.2",
+    "globals": "^15.12.0",
+    "prettier": "^3.3.3",
+    "strip-ansi": "^7.1.2",
+    "typescript": "^5.6.2",
+    "typescript-eslint": "^8.8.1",
+    "vitest": "^3.2.4"
+  }
+}

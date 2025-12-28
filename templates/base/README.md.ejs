@@ -1,0 +1,101 @@
+# <%= projectName %>
+
+Generated via **gl-pw-gen**.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Key Features/Functionalities/Capabilities](#key-featuresfunctionalitiescapabilities)
+- [Tech Stack](#tech-stack)
+- [Prerequisite Software and Tools](#prerequisite-software-and-tools)
+- [Get Started](#get-started)
+- [Running Tests](#running-tests)
+- [Validating Syntax and Linting Rules](#validating-syntax-and-linting-rules)
+- [Project Structure and Folder/Files Description](#project-structure-and-folderfiles-description)
+
+## Overview
+
+This project is built using Playwright and TypeScript. It is designed to provide a robust, scalable, and maintainable solution for automating end-to-end UI testing for web applications. The framework includes features for test execution, reporting, and code quality enforcement, ensuring high-quality test automation.
+
+## Key Features/Functionalities/Capabilities
+
+![image](./framework_features.jpg)
+
+This framework is designed to accelerate the development and execution of UI tests, ensuring high test coverage and reliability for web applications.
+
+## Tech Stack
+
+- Typescript
+- Playwright
+- Allure Report
+- Monocart Report
+
+## Prerequisite Software and Tools
+
+- Node 20.X
+- install java/jdk for Allure Report (Set JAVA_HOME)
+- VS Code, or equivalent IDE
+- Git
+
+## Get Started
+
+### Packages installations
+
+```bash
+npm i
+npx playwright install --with-deps
+```
+
+## Running Tests
+
+```bash
+# Run all tests in headless mode
+`npm test` – run Playwright tests
+
+# Run all tests in headed mode
+`npm run test:headed`
+```
+
+## Validating Syntax and Linting Rules
+
+It is recommended to run Linting and syntax validation scripts locally before pushing changes to your branch in order to prevent broken code, or code that does not meet basic coding standards, making it into your remote branch.
+
+📝 Syntax, and linting errors, must be fixed before a feature branch is allowed to be merged with the main branch, i.e. `main`.
+
+### Syntax Validation
+
+```bash
+# Runs the syntax check
+`npm run syntax-check`
+```
+
+### Run Linting Rules
+
+```bash
+# Runs the linting validations rule
+`npm run lint`
+```
+
+## Project Structure and Folder/Files Description
+
+- `docs`: Contains the docs, coding guideline for Typescript.
+- `src`: Contains the src code, files and folders apart from tests.
+  - `configs`: Contains configuration files for the framework, such as environment-specific settings.
+  - `data`: Stores test data files, such as JSON or CSV files, used during test execution.
+  - `environments`: Contains environment-specific configurations, such as URLs or credentials.
+  - `fixtures`: Includes reusable test data or setup/teardown logic for tests.
+  - `pages`: Implements the Page Object Model (POM) for web pages, encapsulating page-specific navigation, elements and actions.
+  - `reporters`: Contains the custom reporter.
+  - `routes`: Defines Page routes or network interception logic for mocking or monitoring Page requests.
+  - `services`: Contains API/SOAP/DB related services and configs.
+  - `utils`: Includes helper functions, utilities, or common modules used across the framework.
+- `tests/`: Contains tests files and folders.
+- `.editorconfig`: Contains the configuration for Editor.
+- `.gitignore`: Contains the list of files and folders to be ignored by git.
+- `.prettierignore`: Contains the list of files/folders Prettier must ignore.
+- `.prettierrc`: Contains the configurations for Prettier.
+- `eslint.config.js`: Contains the configurations for the linting rules.
+- `package.json`: Contains the nodejs packages and dependencies list, scripts.
+- `playwright.config.ts`: Contains the playwright configurations.
+- `README.md`: Contains the documentation for the project.
+- `tsconfigs.json`: Contains the compilation configurations for TS.

@@ -1,0 +1,5 @@
+allure-results/
+allure-report/
+test-results/
+services/
+specs/

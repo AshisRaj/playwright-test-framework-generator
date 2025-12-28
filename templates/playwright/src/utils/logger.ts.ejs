@@ -1,0 +1,42 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import fs from "node:fs";
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
+
+const PROJECT_ROOT = path.dirname(fileURLToPath(import.meta.url)); // .../src/utils
+const ARTIFACTS_DIR = path.resolve(PROJECT_ROOT, "../../artifacts");
+const LOG_DIR = path.join(ARTIFACTS_DIR, "logs");
+fs.mkdirSync(LOG_DIR, { recursive: true });
+
+const consoleFormat = winston.format.printf(({ level, message, timestamp }) =>
+  `${timestamp} [${level}] ${message}`
+);
+
+const fileFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.json()
+);
+
+export const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || "info",
+  format: winston.format.combine(winston.format.timestamp()),
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.timestamp(),
+        consoleFormat
+      )
+    }),
+    new DailyRotateFile({
+      filename: path.join(LOG_DIR, "test-%DATE%.log"),
+      datePattern: "YYYY-MM-DD",
+      maxSize: "20m",
+      maxFiles: "14d",
+      zippedArchive: true,
+      format: fileFormat
+    })
+  ]
+});
+
