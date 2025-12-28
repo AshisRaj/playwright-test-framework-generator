@@ -10,7 +10,9 @@ describe('CLI help', () => {
     expect(exitCode).toBe(0);
 
     // Top usage line (escape [options])
-    expect(out).toMatch(/^Usage:\s+gl-pw-gen init \[options\] <project-name>/im);
+    expect(out).toMatch(
+      /^Usage:\s+playwright-test-framework-generator init \[options\] <project-name>/im,
+    );
 
     // Key options present in help output
     expect(out).toMatch(/--pm <name>.*Package manager.*\(npm\|yarn\)/i);
@@ -21,7 +23,7 @@ describe('CLI help', () => {
     expect(out).toMatch(/--non-interactive\b.*Alias of --yes/i);
 
     // New/extra options observed in actual help output
-    expect(out).toMatch(/--notify <channels\.\.\.>.*Notifications.*\(email\|slack\|teams\)/i);
+    expect(out).toMatch(/--notify <channels\.\.\.>.*Notifications.*\(email\,slack\,teams\)/i);
     expect(out).toMatch(/--zephyr\b/);
     expect(out).toMatch(/--no-husky\b/);
     expect(out).toMatch(/--preset <name>.*Quick preset.*\(web\|api\|hybrid\)/i);

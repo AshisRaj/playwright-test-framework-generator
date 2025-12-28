@@ -55,7 +55,7 @@ Below is a concise description of the main files and folders in this repository.
 
 ### src (primary implementation)
 
-- `src/`: Core implementation of the CLI and scaffolding logic. Contains the entry points, helpers and orchestration code used by the `gl-pw-gen` command.
+- `src/`: Core implementation of the CLI and scaffolding logic. Contains the entry points, helpers and orchestration code used by the `playwright-test-framework-generator` command.
 - `src/index.ts`: CLI entry — parses arguments, configures options, and delegates to the scaffold flow.
 - `src/files.ts`: File-system helpers — create directories, copy/write files, and apply file-level transformations.
 - `src/prompts.ts`: Interactive prompt definitions and validation used during `init` to collect project choices from the user.
@@ -91,8 +91,8 @@ Follow these steps to get a local development environment and to use the CLI to 
 ### Clone the repository
 
 ```sh
-git clone https://github.com/AshisRaj/gl-pw-gen.git
-cd gl-pw-gen
+git clone https://github.com/AshisRaj/playwright-test-framework-generator.git
+cd playwright-test-framework-generator
 npm i
 ```
 
@@ -106,11 +106,11 @@ npm run build
 
 Run the generator without installing globally using `npx` or by invoking the local `bin/cli.js`:
 
-Use `node ./bin/cli.js --help` or `npx gl-pw-gen --help` for CLI options.
+Use `node ./bin/cli.js --help` or `npx playwright-test-framework-generator --help` for CLI options.
 
 ```sh
 # Use npx (preferred)
-npx gl-pw-gen init my-tests --reporter allure --ci github --preset hybrid
+npx playwright-test-framework-generator init my-tests --reporter allure --ci github --preset hybrid
 
 # Or invoke the local built CLI
 node ./bin/cli.js init my-tests

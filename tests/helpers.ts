@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import stripAnsi from 'strip-ansi';
 
-export const makeTmpDir = (prefix = 'gl-pw-gen-') => {
+export const makeTmpDir = (prefix = 'playwright-test-framework-generator-') => {
   const dir = mkdtempSync(path.join(tmpdir(), prefix));
   console.log(`dir name - ${dir}`);
   return dir;
