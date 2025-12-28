@@ -1,4 +1,4 @@
-# gl-pw-gen
+# playwright-test-framework-generator
 
 ## Table of Contents
 
