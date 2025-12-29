@@ -379,7 +379,7 @@ await (async () => {
   // Always resolve paths from the generated project's config file location
 
   // Load the appropriate .env file based on the ENV variable
-  const ENV = (process.env.ENV || 'uat').toLowerCase();
+  const ENV = (process.env.ENV || 'dev').toLowerCase();
   const dotEnvPath = path.resolve(ENVIRONMENTS_DIR, `.env.${ENV}`);
   dotenv.config({ path: dotEnvPath });
   const args = parseArguments();

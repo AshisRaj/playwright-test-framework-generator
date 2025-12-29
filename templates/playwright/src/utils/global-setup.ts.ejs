@@ -14,7 +14,7 @@ export default async function globalSetup(config: FullConfig) {
   // Example: log the base URL and environment
   const baseURL = config.projects[0].use?.baseURL;
   logger.info(`Base URL: ${baseURL || 'not defined'}`);
-  logger.info(`Environment: ${process.env.ENV || 'local'}`);
+  logger.info(`Environment: ${process.env.ENV || 'dev'}`);
 
   // Example: load or generate tokens, cookies, etc.
   // Save to storageState or env vars if needed

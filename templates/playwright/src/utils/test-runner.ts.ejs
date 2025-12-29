@@ -27,7 +27,7 @@ process.on('SIGTERM', () => {
 const program = new Command()
   .name('pw-runner')
   .description('Custom Playwright test runner with report open')
-  .option('--env <name>', 'Override Environment switch (qa|uat|stage)', 'uat')
+  .option('--env <name>', 'Override Environment switch (qa|uat|stage|dev)', 'dev')
   .option('--reporter <name>', 'Override reporter (monocart|allure|html)', DEFAULT_REPORTER)
   .option('--project <name>', 'Run a specific project (e.g., chromium)', 'chromium')
   .option('--grep <re>', 'Grep by RegExp', '@regression')

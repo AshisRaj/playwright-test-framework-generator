@@ -125,6 +125,20 @@ npx playwright install --with-deps
 npm test
 ```
 
+### Run Tests:
+
+Add/Update the environment related settings into given `my-tests2/src/environments/.env.dev` as default, to be able to successfully run tests and send test result notifications.
+
+Add other environment specific files and use them. e.g. `.env.qa`, `.env.uat`, `.env.staging`.
+
+```sh
+# Check variuos scripts to run in package.json.
+npm test
+
+# via Test Runner
+npm run run-and-notify
+```
+
 ## Run Unit Tests
 
 ```sh
