@@ -1,0 +1,9 @@
+import { APIRequestContext, TestInfo } from '@playwright/test';
+
+export type Fixtures = {
+  api: {
+    request: APIRequestContext;
+    testInfo: TestInfo;
+    log: (msg: string) => void;
+  };
+};

@@ -10,12 +10,16 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
+      <% if (preset === 'web') { %>
       "@pages": ["src/pages/index.ts"],
+      "@services": ["src/services/index.ts"]
+      <% } %>
       "@utils": ["src/utils/index.ts"],
       "@fixtures": ["src/fixtures/index.ts"],
       "@data": ["src/data/index.ts"],
       "@configs": ["src/configs/index.ts"],
-      "@services": ["src/services/index.ts"]
     }
-  }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/**/*.js"]
 }

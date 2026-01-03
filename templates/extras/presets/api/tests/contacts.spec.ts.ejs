@@ -1,0 +1,31 @@
+import { expect, test } from '@fixtures';
+
+let contactId: number;
+const userId = 111;
+
+test('Create contact', { tag: ['@smoke', '@regression'] }, async ({ api }) => {
+  const response = await api.request.post('/contacts', {
+    data: {
+      userId,
+      type: 'phone',
+      value: '+91-9999999999',
+    },
+  });
+
+  expect(response.status()).toBe(201);
+  const body = await response.json();
+  contactId = body.id;
+});
+
+test('Get contacts by userId', { tag: ['@smoke', '@regression'] }, async ({ api }) => {
+  const response = await api.request.get(`/contacts?userId=${userId}`);
+  expect(response.status()).toBe(200);
+
+  const contacts = await response.json();
+  expect(contacts[0].userId).toBe(userId);
+});
+
+test('Delete contact', { tag: ['@smoke', '@regression'] }, async ({ api }) => {
+  const response = await api.request.delete(`/contacts/${contactId}`);
+  expect(response.status()).toBe(200);
+});

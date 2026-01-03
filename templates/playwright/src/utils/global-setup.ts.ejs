@@ -16,15 +16,18 @@ export default async function globalSetup(config: FullConfig) {
   logger.info(`Base URL: ${baseURL || 'not defined'}`);
   logger.info(`Environment: ${process.env.ENV || 'dev'}`);
 
+  <% if (preset === 'web') { %>
   // Example: load or generate tokens, cookies, etc.
   // Save to storageState or env vars if needed
   // Setup cookies for users
   await setUpUsersCookies();
   logger.info('User cookies setup completed');
+  <% } %>
 
   logger.info('✅ Global Setup complete.');
 }
 
+<% if (preset === 'web') { %>
 const setUpUsersCookies = async () => {
   const users = [
     {
@@ -62,3 +65,4 @@ const setUpUsersCookies = async () => {
     }
   }
 };
+<% } %>

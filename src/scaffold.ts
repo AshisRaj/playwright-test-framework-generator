@@ -43,6 +43,29 @@ export async function scaffold(a: Answers) {
     },
   );
 
+  if (a.preset === 'web') {
+    await step('Add Web as preset (UI/POM + fixtures)', async () => {
+      await renderAndCopyDir(TPL('extras/presets/web/pages'), path.join(dest, 'src', 'pages'), a);
+      await renderAndCopyDir(
+        TPL('extras/presets/web/fixtures'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(TPL('extras/presets/web/tests'), path.join(dest, 'tests'), a);
+    });
+  }
+  if (a.preset === 'api') {
+    await step('Add API as preset (API Server + tests + fixtures)', async () => {
+      await renderAndCopyDir(
+        TPL('extras/presets/api/fixtures'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(TPL('extras/presets/api/server'), path.join(dest, 'src', 'utils'), a);
+      await renderAndCopyDir(TPL('extras/presets/api/tests'), path.join(dest, 'tests'), a);
+    });
+  }
+
   // 3) Reporters:  Allure / Monocart / html
   if (a.reporter === 'allure') {
     await step('Include Allure docs (docs/reporters/allure)', async () => {
@@ -121,6 +144,9 @@ export async function scaffold(a: Answers) {
     winston: '^3.17.0',
     'winston-daily-rotate-file': '^5.0.0',
     kolorist: '^1.8.0',
+    ...(a.preset === 'api'
+      ? { express: '^5.2.1', '@types/express': '^5.0.6' }
+      : (undefined as any)),
     'allure-playwright': a.reporter === 'allure' ? '^3.2.1' : (undefined as any),
     // Add the command-line if user chose Allure
     'allure-commandline': a.reporter === 'allure' ? '^2.34.1' : (undefined as any),
@@ -136,7 +162,7 @@ export async function scaffold(a: Answers) {
           '@types/argparse': '^2.0.17',
           'typescript-eslint': '^8.8.1',
         }
-      : {}),
+      : (undefined as any)),
     ...(a.notifications
       ? {
           nodemailer: '^7.0.11',

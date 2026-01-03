@@ -1,0 +1,19 @@
+import { Fixtures } from '@fixtures';
+import { expect as baseExpect, test as baseTest } from '@playwright/test';
+import { logger } from '@utils';
+
+export const test = baseTest.extend<Fixtures>({
+  api: async ({ request }, use, testInfo) => {
+    const api = {
+      request,
+      testInfo,
+      log: (msg: string) => {
+        logger.info(`[${testInfo.title}] ${msg}`);
+      },
+    };
+
+    await use(api);
+  },
+});
+
+export const expect = baseExpect;
