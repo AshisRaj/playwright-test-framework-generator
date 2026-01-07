@@ -110,16 +110,16 @@ Use `node ./bin/cli.js --help` or `npx playwright-test-framework-generator --hel
 
 ```sh
 # Use npx (preferred)
-npx playwright-test-framework-generator init my-tests --reporter allure --ci github --preset hybrid
+npx playwright-test-framework-generator init pw-tests-hybrid --reporter allure --ci github --preset hybrid
 
 # Or invoke the local built CLI
-node ./bin/cli.js init my-tests
+node ./bin/cli.js init pw-tests-web
 ```
 
 ### After scaffolding:
 
 ```sh
-cd my-tests
+cd pw-tests-hybrid
 npm install   # or yarn install
 npx playwright install --with-deps
 npm test
