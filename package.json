@@ -25,7 +25,15 @@
     "lint:fix": "eslint --config eslint.config.js . --ext .ts,.js --fix",
     "check": "npm run typecheck && npm run lint",
     "report": "npx vite preview --outDir html",
-    "prettier-fix": "prettier -w . --ignore-pattern .prettierignore"
+    "prettier-fix": "prettier -w . --ignore-pattern .prettierignore",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --config eslint.config.js . --ext .ts,.js --fix --no-cache",
+      "prettier -w . --ignore-pattern .prettierignore",
+      "tsc -p tsconfig.json --noEmit"
+    ]
   },
   "dependencies": {
     "commander": "^12.1.0",
@@ -50,6 +58,7 @@
     "globals": "^15.12.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-playwright": "^2.0.0",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "husky": "^9.1.7"
   }
 }
