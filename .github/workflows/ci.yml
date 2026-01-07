@@ -29,17 +29,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run prettier check
+        run: |
+          npm run prettier-fix
+          git diff --exit-code || (echo "Prettier changed files; run 'npm run prettier-fix' and commit." && exit 1)
+
       - name: Setup husky
         run: |
           npm run prepare
           git config --get core.hooksPath || echo 'no hooks path set'
           git config core.hooksPath .husky && git config --get core.hooksPath
           chmod +x .husky/pre-commit .husky/commit-msg && git ls-files --stage .husky/pre-commit .husky/commit-msg || ls -la .husky
-
-      - name: Run prettier check
-        run: |
-          npm run prettier-fix
-          git diff --exit-code || (echo "Prettier changed files; run 'npm run prettier-fix' and commit." && exit 1)
 
       - name: Run typecheck and lint
         run: npx lint-staged
