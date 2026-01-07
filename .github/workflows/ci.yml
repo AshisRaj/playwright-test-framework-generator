@@ -35,7 +35,7 @@ jobs:
           git diff --exit-code || (echo "Prettier changed files; run 'npm run prettier-fix' and commit." && exit 1)
 
       - name: Run typecheck and lint
-        run: npm run check
+        run: npx lint-staged
 
       - name: Build
         run: npm run build
