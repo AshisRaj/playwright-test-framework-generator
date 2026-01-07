@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { resolve } from 'path';
 
-import { chromium, expect, FullConfig } from '@playwright/test';
+import { <% if (preset === 'web' || preset === 'hybrid' ) { %>chromium, expect, <% } %> FullConfig} from '@playwright/test';
 import { ARTIFACTS_DIR, logger } from '@utils';
 
 /**
@@ -16,7 +16,7 @@ export default async function globalSetup(config: FullConfig) {
   logger.info(`Base URL: ${baseURL || 'not defined'}`);
   logger.info(`Environment: ${process.env.ENV || 'dev'}`);
 
-  <% if (preset === 'web') { %>
+  <% if (preset === 'web' || preset === 'hybrid' ) { %>
   // Example: load or generate tokens, cookies, etc.
   // Save to storageState or env vars if needed
   // Setup cookies for users
@@ -27,7 +27,7 @@ export default async function globalSetup(config: FullConfig) {
   logger.info('✅ Global Setup complete.');
 }
 
-<% if (preset === 'web') { %>
+<% if (preset === 'web' || preset === 'hybrid') { %>
 const setUpUsersCookies = async () => {
   const users = [
     {

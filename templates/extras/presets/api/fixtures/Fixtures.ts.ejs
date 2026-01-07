@@ -1,9 +1,6 @@
-import { APIRequestContext, TestInfo } from '@playwright/test';
+import type { ApiClient, TestOptions } from '@services';
 
 export type Fixtures = {
-  api: {
-    request: APIRequestContext;
-    testInfo: TestInfo;
-    log: (msg: string) => void;
-  };
+  apiService: ApiClient;
+  apiServiceOptions: TestOptions;
 };

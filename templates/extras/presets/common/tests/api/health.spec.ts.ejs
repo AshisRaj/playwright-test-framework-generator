@@ -1,0 +1,20 @@
+import { expect, test } from '@fixtures';
+
+test.use({
+  apiServiceOptions: {
+    apiHeaders: { Authorization: 'Bearer token' },
+    log: true,
+  },
+});
+
+test(
+  'Health check should return OK',
+  { tag: ['@smoke', '@regression'] },
+  async ({ apiService }) => {
+    const response = await apiService.get('/health');
+
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.status).toBe('OK');
+  },
+);

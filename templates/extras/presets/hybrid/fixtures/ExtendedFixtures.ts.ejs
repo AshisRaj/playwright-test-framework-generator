@@ -3,6 +3,7 @@ import { Fixtures } from '@fixtures';
 import { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from '@pages';
 import type { Page, TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
+import { ApiClient } from '@services';
 import { ARTIFACTS_DIR, loadSessionCookies, logger } from '@utils';
 import path from 'path';
 
@@ -16,6 +17,14 @@ type AuthMode = 'FORM' | 'SESSION' | 'COOKIES';
 const AUTH_MODE = (process.env.AUTH_MODE?.toUpperCase() as AuthMode) || 'FORM';
 
 export const test = baseTest.extend<Fixtures>({
+  // Provide ApiClient wrapper as a fixture that tests can use directly
+  apiService: async ({}, use: (client: ApiClient) => Promise<void>, testInfo: TestInfo) => {
+    const baseURL = process.env.API_BASE_URL || '';
+    const client = new ApiClient({ apiBaseURL: baseURL, apiEndPoint: '' }, testInfo);
+    await use(client);
+    await client.dispose();
+  },
+
   /**
    * A single "authedPage" that guarantees the built-in `page` is authenticated
    * regardless of the chosen AUTH_MODE. All POs are built on top of this.

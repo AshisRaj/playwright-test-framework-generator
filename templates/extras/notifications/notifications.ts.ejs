@@ -261,10 +261,10 @@ export async function sendNotifications(args: any, summary: any) {
       await transporter
         .sendMail(message)
         .then((info) => {
-          logger.log('✉️ Email sent:', info.messageId);
+          logger.info(`✉️ Email sent: ${info.response}`);
         })
         .catch((emailErr) => {
-          logger.error('❌ Email error:', emailErr);
+          logger.error(`❌ Email error: ${emailErr}`);
         });
     }
   } else {
@@ -332,11 +332,11 @@ export async function sendNotifications(args: any, summary: any) {
       }
       webhook
         .send(message)
-        .then(() => {
-          logger.info('💬 Slack sent');
+        .then((result) => {
+          logger.info(`💬 Slack sent: ${result.text}`);
         })
         .catch((slackErr) => {
-          logger.error('❌ Slack error:', slackErr);
+          logger.error(`❌ Slack error: ${slackErr}`);
         });
     }
   } else {
@@ -365,7 +365,7 @@ export async function sendNotifications(args: any, summary: any) {
 
       logger.info('💼 Teams sent');
     } catch (err) {
-      logger.error('❌ Teams error:', err);
+      logger.error(`❌ Teams error: ${err}`);
     }
   } else {
     logger.info('Teams notification is disabled');
@@ -386,12 +386,12 @@ await (async () => {
   // Try to read a local custom summary file
   const summary = (await readCustomSummary()) || {};
   await zipTestReport().catch((err) => {
-    logger.error('Error zipping test report:', err);
+    logger.error(`Error zipping test report: ${err}`);
   });
   await takeScreenshot().catch((err) => {
-    logger.error('Error taking screenshots:', err);
+    logger.error(`Error taking screenshots: ${err}`);
   });
   await sendNotifications(args, summary).catch((err) => {
-    logger.error('Error sending notifications:', err);
+    logger.error(`Error sending notifications: ${err}`);
   });
 })();

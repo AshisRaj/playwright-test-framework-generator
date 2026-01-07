@@ -88,6 +88,7 @@ app.post('/contacts', (req: express.Request, res: express.Response): void => {
  */
 app.get('/contacts', (req: express.Request, res: express.Response): void => {
   const { userId } = req.query;
+  console.log('Fetching contacts', { userId });
   if (userId) {
     res.json(contacts.filter((c) => c.userId === Number(userId)));
   }
@@ -122,7 +123,10 @@ app.post('/profiles', (req: express.Request, res: express.Response): void => {
  * Get Profile By User ID
  */
 app.get('/profiles/:userId', (req: express.Request, res: express.Response): void => {
-  const profile = profiles.find((p) => p.userId === Number(req.params.userId));
+  const profile = profiles.find((p) => {
+    console.log('Checking profile:', p, 'against userId:', req.params.userId);
+    return p.userId === Number(req.params.userId);
+  });
   // eslint-disable-next-line @typescript-eslint/no-unused-expressions
   profile ? res.json(profile) : res.status(404).json({ message: 'Profile not found' });
 });

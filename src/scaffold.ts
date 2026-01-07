@@ -37,7 +37,7 @@ export async function scaffold(a: Answers) {
 
   // 2) Playwright structure
   await step(
-    'Add Playwright structure (src => config, data, environments, fixtures, helpers, pages, reporters, services, utils, tests => cart, checkout, inventory), playwright.config.ts)',
+    'Add Playwright structure (src => config, data, environments, helpers, reporters, utils), playwright.config.ts)',
     async () => {
       await renderAndCopyDir(TPL('playwright'), dest, a);
     },
@@ -45,24 +45,71 @@ export async function scaffold(a: Answers) {
 
   if (a.preset === 'web') {
     await step('Add Web as preset (UI/POM + fixtures)', async () => {
-      await renderAndCopyDir(TPL('extras/presets/web/pages'), path.join(dest, 'src', 'pages'), a);
+      await renderAndCopyDir(
+        TPL('extras/presets/common/pages'),
+        path.join(dest, 'src', 'pages'),
+        a,
+      );
       await renderAndCopyDir(
         TPL('extras/presets/web/fixtures'),
         path.join(dest, 'src', 'fixtures'),
         a,
       );
-      await renderAndCopyDir(TPL('extras/presets/web/tests'), path.join(dest, 'tests'), a);
+      await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
     });
   }
   if (a.preset === 'api') {
-    await step('Add API as preset (API Server + tests + fixtures)', async () => {
+    await step('Add API as preset (API Server, services, tests and fixtures)', async () => {
       await renderAndCopyDir(
         TPL('extras/presets/api/fixtures'),
         path.join(dest, 'src', 'fixtures'),
         a,
       );
-      await renderAndCopyDir(TPL('extras/presets/api/server'), path.join(dest, 'src', 'utils'), a);
-      await renderAndCopyDir(TPL('extras/presets/api/tests'), path.join(dest, 'tests'), a);
+      await renderAndCopyDir(
+        TPL('extras/presets/common/server'),
+        path.join(dest, 'src', 'utils'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/services'),
+        path.join(dest, 'src', 'services'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/tests/api'),
+        path.join(dest, 'tests/api'),
+        a,
+      );
+    });
+  }
+  if (a.preset === 'hybrid') {
+    await step('Add UI + API as preset (API Server + tests + fixtures)', async () => {
+      await renderAndCopyDir(
+        TPL('extras/presets/common/pages'),
+        path.join(dest, 'src', 'pages'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/hybrid/fixtures'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/server'),
+        path.join(dest, 'src', 'utils'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/services'),
+        path.join(dest, 'src', 'services'),
+        a,
+      );
+      await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
+      await renderAndCopyDir(
+        TPL('extras/presets/common/tests/api'),
+        path.join(dest, 'tests/api'),
+        a,
+      );
     });
   }
 
@@ -144,14 +191,23 @@ export async function scaffold(a: Answers) {
     winston: '^3.17.0',
     'winston-daily-rotate-file': '^5.0.0',
     kolorist: '^1.8.0',
-    ...(a.preset === 'api'
+    ...(a.preset === 'api' || a.preset === 'hybrid'
       ? { express: '^5.2.1', '@types/express': '^5.0.6' }
       : (undefined as any)),
-    'allure-playwright': a.reporter === 'allure' ? '^3.2.1' : (undefined as any),
     // Add the command-line if user chose Allure
-    'allure-commandline': a.reporter === 'allure' ? '^2.34.1' : (undefined as any),
+    ...(a.reporter === 'allure'
+      ? {
+          'allure-playwright': '^3.2.1',
+          'allure-commandline': '^2.34.1',
+        }
+      : (undefined as any)),
     // Add Monocart only when chosen
-    'monocart-reporter': a.reporter === 'monocart' ? '^2.9.18' : (undefined as any),
+    ...(a.reporter === 'monocart'
+      ? {
+          'monocart-reporter': '^2.9.18',
+        }
+      : (undefined as any)),
+
     // TypeScript toolchain (only when TS is chosen)
     ...(a.language === 'ts' || a.language === 'js'
       ? {
@@ -169,7 +225,7 @@ export async function scaffold(a: Answers) {
           '@slack/webhook': '^7.0.6',
           '@types/nodemailer': '^7.0.4',
         }
-      : {}),
+      : (undefined as any)),
   };
 
   // 5) Doc structure

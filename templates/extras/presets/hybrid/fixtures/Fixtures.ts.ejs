@@ -1,0 +1,20 @@
+import { CheckoutDataset } from '@data';
+import type { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from '@pages';
+import { Page } from '@playwright/test';
+import type { ApiClient, TestOptions } from '@services';
+
+export type Fixtures = {
+  authedPage: Page; // internal in tests if needed
+  // Page classes
+  loginPage: LoginPage;
+  homePage: HomePage;
+  inventoryPage: InventoryPage;
+  cartPage: CartPage;
+  checkoutPage: CheckoutPage;
+
+  apiService: ApiClient;
+  apiServiceOptions: TestOptions;
+
+  // Test Data
+  checkoutData: CheckoutDataset;
+};

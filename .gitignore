@@ -13,10 +13,7 @@ trace.zip
 html/
 
 test-ui/
-my-tests/
-mytests/
-mytest/
-mytest2/
+pw-tests*/
 
 
 # Playwright

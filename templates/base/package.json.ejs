@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    <% if (preset === 'api') { %>
+    <% if (preset === 'api' || preset === 'hybrid') { %>
     "start": "ts-node ./src/utils/server.ts",
     <% } %>
     "run": "tsx src/utils/test-runner.ts",

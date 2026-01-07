@@ -1,0 +1,36 @@
+import { expect, test } from '@fixtures';
+
+let userId: number;
+
+test('Create user', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
+  const response = await apiService.post('/users', {
+    data: {
+      name: 'Ashis Raj',
+      email: 'ashis@example.com',
+    },
+  });
+
+  expect(response.status()).toBe(201);
+  const body = await response.json();
+
+  userId = body.id;
+  expect(body.data.name).toBe('Ashis Raj');
+});
+
+test('Get all users', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
+  const response = await apiService.get('/users');
+  expect(response.status()).toBe(200);
+
+  const users = await response.json();
+  expect(users.length).toBeGreaterThan(0);
+});
+
+test('Get user by ID', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
+  const response = await apiService.get(`/users/${userId}`);
+  expect(response.status()).toBe(200);
+});
+
+test('Delete user', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
+  const response = await apiService.delete(`/users/${userId}`);
+  expect(response.status()).toBe(200);
+});

@@ -1,0 +1,125 @@
+import { APIRequestContext, APIResponse, request as baseRequest, TestInfo } from '@playwright/test';
+import { logger } from '@utils';
+<% if (reporter === 'allure') { %>
+import { allure } from 'allure-playwright';
+<% } %>
+
+type ClientCertificate = {
+  origin: string;
+  certPath?: string;
+  keyPath?: string;
+  pfxPath?: string;
+  passphrase?: string;
+};
+
+export type TestOptions = {
+  apiBaseURL?: string;
+  apiEndPoint?: string;
+  apiHeaders?: Record<string, string>;
+  clientCertificates?: ClientCertificate[];
+  log?: boolean;
+};
+
+export class ApiClient {
+  private request;
+  private testInfo: TestInfo;
+  private log: boolean;
+
+  constructor(
+    { apiBaseURL, apiEndPoint, apiHeaders, clientCertificates, log }: TestOptions,
+    testInfo: TestInfo,
+  ) {
+    // newContext returns a Promise<APIRequestContext> so keep the promise here
+    this.request = baseRequest.newContext({
+      baseURL: apiEndPoint ? `${apiBaseURL}/${apiEndPoint}/` : apiBaseURL,
+      extraHTTPHeaders: apiHeaders,
+      clientCertificates: clientCertificates,
+      ignoreHTTPSErrors: false,
+    }) as Promise<APIRequestContext>;
+    this.testInfo = testInfo;
+    this.log = log || false;
+  }
+
+  async get(url: string, headers?: Record<string, string>) {
+    return this.execute('GET', url, undefined, headers);
+  }
+
+  async post(url: string, body?: unknown, headers?: Record<string, string>) {
+    return this.execute('POST', url, body, headers);
+  }
+
+  async put(url: string, body?: unknown, headers?: Record<string, string>) {
+    return this.execute('PUT', url, body, headers);
+  }
+
+  async patch(url: string, body?: unknown, headers?: Record<string, string>) {
+    return this.execute('PATCH', url, body, headers);
+  }
+
+  async delete(url: string, headers?: Record<string, string>) {
+    return this.execute('DELETE', url, undefined, headers);
+  }
+
+  private async execute(
+    method: string,
+    url: string,
+    body?: unknown,
+    headers?: Record<string, string>,
+  ): Promise<APIResponse> {
+
+    <% if (reporter === 'allure') { %>
+    const reqPayload = {
+      method,
+      url,
+      headers,
+      body,
+    };
+    await allure.attachment(
+      `REQUEST: ${method} ${url} ${headers ? JSON.stringify(this.request) : ''}`,
+      JSON.stringify(reqPayload, null, 2),
+      'application/json',
+    );
+    <% } %>
+
+    const ctx = await this.request;
+    const response = await ctx.fetch(url, {
+      method,
+      data: body,
+      headers,
+    });
+
+    <% if (reporter === 'allure') { %>
+      const respPayload = {
+      status: response.status(),
+      statusText: response.statusText(),
+      headers: response.headers(),
+      body: await response.text(),
+    };
+
+
+    await allure.attachment(
+      `RESPONSE: ${method} ${url}`,
+      JSON.stringify(respPayload, null, 2),
+      'application/json',
+    );
+    <% } %>
+    return response;
+  }
+
+  async dispose() {
+    const ctx = await this.request;
+    await ctx
+      .dispose()
+      .then(() => {
+        if (this.log) {
+          logger.info(`API request context disposed for test: ${this.testInfo.title}`);
+        }
+      })
+      .catch((error) => {
+        logger.error(
+          `Failed to dispose API request context for test: ${this.testInfo.title}`,
+          error,
+        );
+      });
+  }
+}

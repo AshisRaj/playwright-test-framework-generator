@@ -1,18 +1,31 @@
 import { Fixtures } from '@fixtures';
+import type { TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
-import { logger } from '@utils';
+import { ApiClient, type TestOptions } from '@services';
 
 export const test = baseTest.extend<Fixtures>({
-  api: async ({ request }, use, testInfo) => {
-    const api = {
-      request,
-      testInfo,
-      log: (msg: string) => {
-        logger.info(`[${testInfo.title}] ${msg}`);
-      },
-    };
+  // Allow tests to optionally provide API client options via `test.use({ apiServiceOptions: { ... } })`
+  apiServiceOptions: async ({}, use: (opts: TestOptions) => Promise<void>) => {
+    await use({});
+  },
 
-    await use(api);
+  // Provide ApiClient wrapper as a fixture that tests can use directly
+  apiService: async (
+    { apiServiceOptions },
+    use: (client: ApiClient) => Promise<void>,
+    testInfo: TestInfo,
+  ) => {
+    const baseURL = apiServiceOptions?.apiBaseURL || process.env.API_BASE_URL || '';
+    const options: TestOptions = {
+      apiBaseURL: baseURL,
+      apiEndPoint: apiServiceOptions?.apiEndPoint || '',
+      apiHeaders: apiServiceOptions?.apiHeaders,
+      clientCertificates: apiServiceOptions?.clientCertificates,
+      log: apiServiceOptions?.log,
+    };
+    const client = new ApiClient(options, testInfo);
+    await use(client);
+    await client.dispose();
   },
 });
 

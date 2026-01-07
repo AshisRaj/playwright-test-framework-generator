@@ -1,9 +1,0 @@
-import { expect, test } from '@fixtures';
-
-test('Health check should return OK', { tag: ['@smoke', '@regression'] }, async ({ api }) => {
-  const response = await api.request.get('/health');
-
-  expect(response.status()).toBe(200);
-  const body = await response.json();
-  expect(body.status).toBe('OK');
-});
