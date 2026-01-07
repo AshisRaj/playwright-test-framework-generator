@@ -3,7 +3,18 @@ import { describe, expect, it } from 'vitest';
 import { exists, makeTmpDir, readJSON, runCLI } from './helpers';
 
 function toArgs(name: string, c: any): string[] {
-  const args = ['init', name, '--pm', c.pm, '--reporter', c.reporter, '--ci', c.ci];
+  const args = [
+    'init',
+    name,
+    '--pm',
+    c.pm,
+    '--reporter',
+    c.reporter,
+    '--ci',
+    c.ci,
+    '--preset',
+    c.preset,
+  ];
   if (c.lang === 'js') args.push('--js');
   if (c.husky === false) args.push('--no-husky');
   if (c.zephyr === true) args.push('--zephyr');
@@ -53,6 +64,68 @@ describe('init (additional matrix)', () => {
       preset: 'api',
       husky: false,
       zephyr: true,
+    },
+
+    // Additional permutations to increase coverage
+    {
+      id: 'web-allure-yarn-gitlab-ts-zephyr',
+      pm: 'yarn',
+      reporter: 'allure',
+      ci: 'gitlab',
+      lang: 'ts',
+      preset: 'web',
+      husky: true,
+      zephyr: true,
+    },
+    {
+      id: 'api-monocart-npm-none-js-nohusky',
+      pm: 'npm',
+      reporter: 'monocart',
+      ci: 'none',
+      lang: 'js',
+      preset: 'api',
+      husky: false,
+      zephyr: false,
+    },
+    {
+      id: 'hybrid-html-yarn-github-js-husky',
+      pm: 'yarn',
+      reporter: 'html',
+      ci: 'github',
+      lang: 'js',
+      preset: 'hybrid',
+      husky: true,
+      zephyr: false,
+    },
+    {
+      id: 'api-allure-npm-gitlab-js-zephyr-nohusky',
+      pm: 'npm',
+      reporter: 'allure',
+      ci: 'gitlab',
+      lang: 'js',
+      preset: 'api',
+      husky: false,
+      zephyr: true,
+    },
+    {
+      id: 'web-monocart-yarn-github-ts-husky',
+      pm: 'yarn',
+      reporter: 'monocart',
+      ci: 'github',
+      lang: 'ts',
+      preset: 'web',
+      husky: true,
+      zephyr: false,
+    },
+    {
+      id: 'web-html-npm-none-ts-nohusky',
+      pm: 'npm',
+      reporter: 'html',
+      ci: 'none',
+      lang: 'ts',
+      preset: 'web',
+      husky: false,
+      zephyr: false,
     },
   ] as const;
 

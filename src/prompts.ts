@@ -38,6 +38,7 @@ export async function askQuestions(projectName: string, flags: any): Promise<Ans
     packageManager: flags.pm === 'yarn' ? 'yarn' : 'npm',
     ci: flags.ci,
     reporter: flags.reporter,
+    notifications: flags.notifications ?? true,
     husky: flags.husky !== false,
     zephyr: !!flags.zephyr,
     preset: flags.preset,

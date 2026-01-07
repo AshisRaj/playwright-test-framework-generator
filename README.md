@@ -13,7 +13,7 @@
   - [Build the CLI (local)](#build-the-cli-if-running-locally)
   - [Use the CLI to scaffold a project](#use-the-cli-to-scaffold-a-project)
   - [After scaffolding](#after-scaffolding)
-- [Run Unit Tests](#run-unit-tests)
+- [Testing Strategy](#testing-strategy)
 
 ## Overview
 
@@ -139,10 +139,18 @@ npm test
 npm run run-and-notify
 ```
 
-## Run Unit Tests
+## Testing strategy
+
+- **Build-first:** tests execute the built CLI (`dist/index.js`). Run `npm run build` before running tests locally.
+- **Integration-style matrix:** many tests scaffold temporary projects under the OS temp directory (see `tests/more-matrix.spec.ts`). These exercise combinations of flags (`--pm`, `--reporter`, `--ci`, `--preset`, `--js`, `--no-husky`, `--zephyr`) to validate that templates, `package.json` wiring, and files are generated correctly.
+- **Unit tests for inputs:** `tests/prompts.spec.ts` covers `askQuestions` non-interactive mapping so flags map to the `Answers` shape predictably.
+- **Helpers:** use `tests/helpers.ts` to run the CLI, create temp dirs, and inspect generated files (`runCLI`, `makeTmpDir`, `readJSON`, `exists`). Follow the helpers when adding new tests.
+- **Fast iteration tips:** for faster unit tests, add isolated tests that mock `src/files.ts` or the filesystem instead of creating full scaffolds.
+- **Extending the matrix:** add cases to `tests/more-matrix.spec.ts` to cover new flags or presets. Keep each case compact to avoid long test times.
+
+Commands to run tests locally (recommended):
 
 ```sh
-npx vitest
-or
-npx vitest run
+npm run build
+npx vitest --run
 ```
