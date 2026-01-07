@@ -23,6 +23,7 @@ describe('CLI help', () => {
     expect(out).toMatch(/--non-interactive\b.*Alias of --yes/i);
 
     // New/extra options observed in actual help output
+    // eslint-disable-next-line no-useless-escape
     expect(out).toMatch(/--notify <channels\.\.\.>.*Notifications.*\(email\,slack\,teams\)/i);
     expect(out).toMatch(/--zephyr\b/);
     expect(out).toMatch(/--no-husky\b/);

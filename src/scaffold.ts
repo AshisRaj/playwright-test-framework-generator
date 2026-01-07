@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -5,8 +6,8 @@ import ora from 'ora';
 import { copyDir, renderAndCopyDir, writeJSON } from './files.js';
 import type { Answers } from './prompts.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const TPL = (p: string) => path.join(__dirname, '..', 'templates', p);
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+const TPL = (p: string) => path.join(dirname, '..', 'templates', p);
 
 export async function scaffold(a: Answers) {
   const dest = path.resolve(process.cwd(), a.projectName);

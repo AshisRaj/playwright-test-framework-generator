@@ -20,6 +20,10 @@
     "dev": "tsc -w",
     "prepublishOnly": "npm run build",
     "test": "npx vitest",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint --config eslint.config.js . --ext .ts,.js --max-warnings 0",
+    "lint:fix": "eslint --config eslint.config.js . --ext .ts,.js --fix",
+    "check": "npm run typecheck && npm run lint",
     "report": "npx vite preview --outDir html"
   },
   "dependencies": {
