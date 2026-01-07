@@ -25,7 +25,7 @@
     "lint:fix": "eslint --config eslint.config.js . --ext .ts,.js --fix",
     "check": "npm run typecheck && npm run lint",
     "report": "npx vite preview --outDir html",
-    "prettier-fix": "prettier -w . --ignore-pattern .prettierignore",
+    "prettier-fix": "prettier -w .",
     "prepare": "husky"
   },
   "lint-staged": {
