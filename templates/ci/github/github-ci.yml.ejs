@@ -9,6 +9,12 @@ jobs:
         with:
           node-version: 20
       - run: npm i
+      - name: Run typecheck and lint
+        run: npm run check
+      - name: Check formatting (Prettier)
+        run: |
+          npm run prettier-fix
+          git diff --exit-code || (echo "Prettier changed files; run 'npm run prettier-fix' and commit." && exit 1)
       - run: npx playwright install --with-deps
       - run: npm test
       <% if (reporter === "monocart") { %>

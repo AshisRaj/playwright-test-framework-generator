@@ -4,6 +4,9 @@ playwright:
   stage: test
   script:
     - npm i
+    - npm run check
+    - npm run prettier-fix
+    - git diff --exit-code || (echo "Prettier changed files; run 'npm run prettier-fix' and commit." && exit 1)
     - npm test
   artifacts:
     when: always
