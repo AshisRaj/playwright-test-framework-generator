@@ -31,7 +31,7 @@
   "lint-staged": {
     "*.{ts,js}": [
       "eslint --config eslint.config.js . --ext .ts,.js --fix --no-cache",
-      "prettier -w . --ignore-pattern .prettierignore",
+      "prettier -w .",
       "tsc -p tsconfig.json --noEmit"
     ]
   },
