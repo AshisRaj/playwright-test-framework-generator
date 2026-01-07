@@ -6,12 +6,19 @@ on:
   pull_request:
     branches: [main]
 
+# Ensure the workflow has permission to create/update pages and push branches
+permissions:
+  contents: write
+  pages: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
@@ -46,6 +53,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
