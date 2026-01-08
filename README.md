@@ -112,7 +112,7 @@ Use `node ./bin/cli.js --help` or `npx playwright-test-framework-generator --hel
 # Use npx (preferred)
 npx playwright-test-framework-generator init pw-tests-hybrid --reporter allure --ci github --preset hybrid
 
-# Or invoke the local built CLI - test
+# Or invoke the local built CLI
 node ./bin/cli.js init pw-tests-web
 ```
 
