@@ -42,7 +42,7 @@ jobs:
           chmod +x .husky/pre-commit .husky/commit-msg && git ls-files --stage .husky/pre-commit .husky/commit-msg || ls -la .husky
 
       - name: Run typecheck and lint
-        run: npx lint-staged
+        run: npm run check
 
       - name: Build
         run: npm run build
