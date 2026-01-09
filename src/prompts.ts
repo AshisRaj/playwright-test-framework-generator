@@ -10,7 +10,7 @@ export type Answers = {
   notifications: boolean;
   husky: boolean;
   zephyr: boolean;
-  preset: 'web' | 'api' | 'hybrid';
+  preset: 'web' | 'api' | 'soap' | 'hybrid';
 };
 
 type ListQ<K extends keyof Answers> = {
@@ -56,7 +56,7 @@ export async function askQuestions(projectName: string, flags: any): Promise<Ans
       notifications: base.notifications ?? true,
       husky: base.husky ?? true,
       zephyr: base.zephyr ?? false,
-      preset: (base.preset ?? 'web') as 'web' | 'api' | 'hybrid',
+      preset: (base.preset ?? 'web') as 'web' | 'api' | 'soap' | 'hybrid',
     };
   }
 
@@ -89,6 +89,7 @@ export async function askQuestions(projectName: string, flags: any): Promise<Ans
         { name: 'Web (UI/POM + fixtures)', value: 'web' },
         { name: 'API (Axios + assertions)', value: 'api' },
         { name: 'Hybrid (UI + API)', value: 'hybrid' },
+        { name: 'SOAP (WSDL/soap client + fixtures)', value: 'soap' },
       ],
       default: base.preset,
     },

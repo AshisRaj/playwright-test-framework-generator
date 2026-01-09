@@ -27,7 +27,7 @@ describe('CLI help', () => {
     expect(out).toMatch(/--notify <channels\.\.\.>.*Notifications.*\(email\,slack\,teams\)/i);
     expect(out).toMatch(/--zephyr\b/);
     expect(out).toMatch(/--no-husky\b/);
-    expect(out).toMatch(/--preset <name>.*Quick preset.*\(web\|api\|hybrid\)/i);
+    expect(out).toMatch(/--preset <name>.*Quick preset.*\(web\|api\|soap\|hybrid\)/i);
     expect(out).toMatch(/-h, --help\b.*display help for command/i);
   });
 });

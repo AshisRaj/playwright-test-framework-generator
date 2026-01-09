@@ -22,7 +22,7 @@ program
   .option('--notify <channels...>', 'Notifications (email,slack,teams)', 'email')
   .option('--zephyr', 'Include Zephyr results stub', false)
   .option('--no-husky', 'Skip Husky hooks')
-  .option('--preset <name>', 'Quick preset (web|api|hybrid)', 'web')
+  .option('--preset <name>', 'Quick preset (web|api|soap|hybrid)', 'web')
   .action(async (projectName, flags) => {
     const answers = await askQuestions(projectName, flags);
     await scaffold(answers);

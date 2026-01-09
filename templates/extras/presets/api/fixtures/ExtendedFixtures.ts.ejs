@@ -1,11 +1,11 @@
 import { Fixtures } from '@fixtures';
 import type { TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
-import { ApiClient, type TestOptions } from '@services';
+import { ApiClient, type ApiOptions } from '@services';
 
 export const test = baseTest.extend<Fixtures>({
   // Allow tests to optionally provide API client options via `test.use({ apiServiceOptions: { ... } })`
-  apiServiceOptions: async ({}, use: (opts: TestOptions) => Promise<void>) => {
+  apiServiceOptions: async ({}, use: (opts: ApiOptions) => Promise<void>) => {
     await use({});
   },
 
@@ -16,7 +16,7 @@ export const test = baseTest.extend<Fixtures>({
     testInfo: TestInfo,
   ) => {
     const baseURL = apiServiceOptions?.apiBaseURL || process.env.API_BASE_URL || '';
-    const options: TestOptions = {
+    const options: ApiOptions = {
       apiBaseURL: baseURL,
       apiEndPoint: apiServiceOptions?.apiEndPoint || '',
       apiHeaders: apiServiceOptions?.apiHeaders,

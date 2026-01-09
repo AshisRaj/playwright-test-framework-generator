@@ -1,0 +1,32 @@
+import { expect, test } from '@fixtures';
+
+test.use({
+  soapServiceOptions: {
+    url: 'http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso',
+    log: true,
+  },
+});
+
+test(
+  'SOAP CountryInfo CapitalCity returns a non-empty string',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<string>(soapData.countryInfo.capitalCity);
+
+    expect(result.status).toBe(200);
+    expect(typeof result.parsed).toBe('string');
+    expect((result.parsed as string).length).toBeGreaterThan(0);
+  },
+);
+
+test(
+  'SOAP CountryInfo CountryName returns a non-empty string',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<string>(soapData.countryInfo.countryName);
+
+    expect(result.status).toBe(200);
+    expect(typeof result.parsed).toBe('string');
+    expect((result.parsed as string).length).toBeGreaterThan(0);
+  },
+);

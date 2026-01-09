@@ -4,7 +4,11 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
+import path from 'path';
 import * as tseslint from 'typescript-eslint';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -32,6 +36,10 @@ export default [
   // Base language options (Node + ESM)
   {
     languageOptions: {
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+      },
       ecmaVersion: 2023,
       sourceType: 'module',
       globals: { ...globals.node },

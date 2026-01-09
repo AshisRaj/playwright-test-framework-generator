@@ -1,20 +1,31 @@
 import { CheckoutDataset } from '@data';
 import type { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from '@pages';
 import { Page } from '@playwright/test';
-import type { ApiClient, TestOptions } from '@services';
+import type { ApiClient, ApiOptions, SoapClient, SoapOptions } from '@services';
+
+import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData } from '@data';
+
 
 export type Fixtures = {
+  // Services
+  apiService: ApiClient;
+  soapService: SoapClient;
+  apiServiceOptions: ApiOptions;
+  soapServiceOptions: SoapOptions;
+
+  // Test Data
+  soapData: {
+    calculator: typeof calculatorSoapData;
+    countryInfo: typeof countryInfoSoapData;
+    numberConversion: typeof numberConversionSoapData;
+  };
+  checkoutData: CheckoutDataset;
+
+  // Pages
   authedPage: Page; // internal in tests if needed
-  // Page classes
   loginPage: LoginPage;
   homePage: HomePage;
   inventoryPage: InventoryPage;
   cartPage: CartPage;
   checkoutPage: CheckoutPage;
-
-  apiService: ApiClient;
-  apiServiceOptions: TestOptions;
-
-  // Test Data
-  checkoutData: CheckoutDataset;
 };

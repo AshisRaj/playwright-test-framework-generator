@@ -1,0 +1,14 @@
+import type { SoapClient, SoapOptions } from '@services';
+import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData } from '@data';
+
+export type Fixtures = {
+  soapService: SoapClient;
+  soapServiceOptions: SoapOptions;
+
+  // Test Data
+  soapData: {
+    calculator: typeof calculatorSoapData;
+    countryInfo: typeof countryInfoSoapData;
+    numberConversion: typeof numberConversionSoapData;
+  };
+};

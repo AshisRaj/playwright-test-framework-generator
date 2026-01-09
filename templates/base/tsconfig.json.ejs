@@ -10,16 +10,10 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      <% if (preset === 'web') { %>
+      <% if (preset === 'web' || preset === 'hybrid') { %>
       "@pages": ["src/pages/index.ts"],
       <% } %>
-      <% if (preset === 'api') { %>
       "@services": ["src/services/index.ts"],
-      <% } %>
-      <% if (preset === 'hybrid') { %>
-      "@pages": ["src/pages/index.ts"],
-      "@services": ["src/services/index.ts"],
-      <% } %>
       "@utils": ["src/utils/index.ts"],
       "@fixtures": ["src/fixtures/index.ts"],
       "@data": ["src/data/index.ts"],

@@ -1,9 +1,14 @@
-import { checkoutData } from '@data';
+import {
+  calculatorSoapData,
+  checkoutData,
+  countryInfoSoapData,
+  numberConversionSoapData,
+} from '@data';
 import { Fixtures } from '@fixtures';
 import { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from '@pages';
 import type { Page, TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
-import { ApiClient } from '@services';
+import { ApiClient, SoapClient, type ApiOptions, type SoapOptions } from '@services';
 import { ARTIFACTS_DIR, loadSessionCookies, logger } from '@utils';
 import path from 'path';
 
@@ -17,12 +22,70 @@ type AuthMode = 'FORM' | 'SESSION' | 'COOKIES';
 const AUTH_MODE = (process.env.AUTH_MODE?.toUpperCase() as AuthMode) || 'FORM';
 
 export const test = baseTest.extend<Fixtures>({
+  // Allow tests to optionally provide API client options via `test.use({ apiServiceOptions: { ... } })`
+  apiServiceOptions: async ({}, use: (opts: ApiOptions) => Promise<void>) => {
+    await use({});
+  },
+
+  // Allow tests to optionally provide SOAP client options via `test.use({ soapServiceOptions: { ... } })`
+  soapServiceOptions: async ({}, use: (opts: SoapOptions) => Promise<void>) => {
+    await use({});
+  },
+
   // Provide ApiClient wrapper as a fixture that tests can use directly
-  apiService: async ({}, use: (client: ApiClient) => Promise<void>, testInfo: TestInfo) => {
-    const baseURL = process.env.API_BASE_URL || '';
-    const client = new ApiClient({ apiBaseURL: baseURL, apiEndPoint: '' }, testInfo);
+  apiService: async (
+    { apiServiceOptions }: { apiServiceOptions: ApiOptions },
+    use: (client: ApiClient) => Promise<void>,
+    testInfo: TestInfo,
+  ) => {
+    const baseURL = apiServiceOptions?.apiBaseURL || process.env.API_BASE_URL;
+    const options: ApiOptions = {
+      apiBaseURL: baseURL,
+      apiEndPoint: apiServiceOptions?.apiEndPoint || '',
+      apiHeaders: apiServiceOptions?.apiHeaders,
+      clientCertificates: apiServiceOptions?.clientCertificates,
+      log: apiServiceOptions?.log,
+    };
+    const client = new ApiClient(options, testInfo);
     await use(client);
     await client.dispose();
+  },
+
+  // Provide SoapClient wrapper as a fixture that tests can use directly
+  soapService: async (
+    { soapServiceOptions }: { soapServiceOptions: SoapOptions },
+    use: (client: SoapClient) => Promise<void>,
+    testInfo: TestInfo,
+  ) => {
+    const wsdlURL = soapServiceOptions?.url;
+    const options: SoapOptions = {
+      url: wsdlURL,
+      headers: soapServiceOptions?.headers,
+      soapAction: soapServiceOptions?.soapAction,
+      body: soapServiceOptions?.body,
+      responsePath: soapServiceOptions?.responsePath,
+      log: soapServiceOptions?.log,
+    };
+    const client = new SoapClient(options, testInfo);
+    await use(client);
+    await client.dispose();
+  },
+
+  soapData: async ({}, use) => {
+    await use({
+      calculator: calculatorSoapData,
+      countryInfo: countryInfoSoapData,
+      numberConversion: numberConversionSoapData,
+    });
+  },
+
+  /**
+   * Checkout test data fixture
+   * - Loads from ./data/Checkout.ts (typed import)
+   * - Available as `{ checkoutData }` in all tests
+   */
+  checkoutData: async ({}, use) => {
+    await use(checkoutData);
   },
 
   /**
@@ -68,15 +131,6 @@ export const test = baseTest.extend<Fixtures>({
 
   checkoutPage: async ({ authedPage }, use) => {
     await use(new CheckoutPage(authedPage));
-  },
-
-  /**
-   * Checkout test data fixture
-   * - Loads from ./data/checkout.ts (typed import)
-   * - Available as `{ checkoutData }` in all tests
-   */
-  checkoutData: async ({}, use) => {
-    await use(checkoutData);
   },
 
   // Page objects as fixtures

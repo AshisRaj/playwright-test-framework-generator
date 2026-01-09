@@ -1,0 +1,42 @@
+import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData } from '@data';
+import { Fixtures } from '@fixtures';
+import type { TestInfo } from '@playwright/test';
+import { expect as baseExpect, test as baseTest } from '@playwright/test';
+import { SoapClient, type SoapOptions } from '@services';
+
+export const test = baseTest.extend<Fixtures>({
+  // Allow tests to optionally provide SOAP client options via `test.use({ soapServiceOptions: { ... } })`
+  soapServiceOptions: async ({}, use: (opts: SoapOptions) => Promise<void>) => {
+    await use({});
+  },
+
+  // Provide SoapClient wrapper as a fixture that tests can use directly
+  soapService: async (
+    { soapServiceOptions }: { soapServiceOptions: SoapOptions },
+    use: (client: SoapClient) => Promise<void>,
+    testInfo: TestInfo,
+  ) => {
+    const wsdlURL = soapServiceOptions?.url || process.env.SOAP_WSDL_URL;
+    const options: SoapOptions = {
+      url: wsdlURL,
+      headers: soapServiceOptions?.headers,
+      soapAction: soapServiceOptions?.soapAction,
+      body: soapServiceOptions?.body,
+      responsePath: soapServiceOptions?.responsePath,
+      log: soapServiceOptions?.log,
+    };
+    const client = new SoapClient(options, testInfo);
+    await use(client);
+    await client.dispose();
+  },
+
+  soapData: async ({}, use) => {
+    await use({
+      calculator: calculatorSoapData,
+      countryInfo: countryInfoSoapData,
+      numberConversion: numberConversionSoapData,
+    });
+  },
+});
+
+export const expect = baseExpect;

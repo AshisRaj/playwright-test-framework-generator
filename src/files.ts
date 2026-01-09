@@ -18,6 +18,19 @@ export async function copyDir(src: string, dst: string) {
 }
 
 export async function renderAndCopyDir(src: string, dst: string, data: any) {
+  // If `src` is a file, render/copy that single file into `dst` (which is treated
+  // as a directory). Otherwise treat `src` as a directory and walk it.
+  const stat = await fs.stat(src);
+  if (stat.isFile()) {
+    await ensureDir(dst);
+    const content = await fs.readFile(src, 'utf8');
+    const out = src.endsWith('.ejs') ? render(content, data) : content;
+    const destName = path.basename(src).replace(/\.ejs$/, '');
+    const destPath = path.join(dst, destName);
+    await fs.writeFile(destPath, out, 'utf8');
+    return;
+  }
+
   await ensureDir(dst);
   for (const entry of await fs.readdir(src, { withFileTypes: true })) {
     const s = path.join(src, entry.name);

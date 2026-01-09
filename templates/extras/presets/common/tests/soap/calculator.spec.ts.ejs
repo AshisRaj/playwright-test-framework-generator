@@ -1,0 +1,55 @@
+import { logger } from '@utils';
+import { expect, test } from '@fixtures';
+
+test(
+  'SOAP Calculator Add',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<number>(soapData.calculator.add);
+
+    expect(result.status).toBe(200);
+    expect(result.parsed).toBe(5);
+  },
+);
+
+test(
+  'SOAP Calculator Subtract',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<number>(soapData.calculator.subtract);
+
+    logger.info('Raw SOAP Response:', result.rawBody);
+    logger.info('Parsed Result:', result.parsed);
+
+    expect(result.status).toBe(200);
+    expect(result.parsed).toBe(6);
+  },
+);
+
+test(
+  'SOAP Calculator Multiply',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<number>(soapData.calculator.multiply);
+
+    logger.info('Raw SOAP Response:', result.rawBody);
+    logger.info('Parsed Result:', result.parsed);
+
+    expect(result.status).toBe(200);
+    expect(result.parsed).toBe(42);
+  },
+);
+
+test(
+  'SOAP Calculator Divide',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<number>(soapData.calculator.divide);
+
+    logger.info('Raw SOAP Response:', result.rawBody);
+    logger.info('Parsed Result:', result.parsed);
+
+    expect(result.status).toBe(200);
+    expect(result.parsed).toBe(5);
+  },
+);

@@ -1,1 +1,7 @@
-export * from './ApiClient'
+<% if (["api", "hybrid"].includes(preset)) { %>
+export * from './api/ApiClient';
+<% } %>
+<% if (["soap", "hybrid"].includes(preset)) { %>
+export * from './soap/SoapClient';
+export * from './soap/SoapParser';
+<% } %>

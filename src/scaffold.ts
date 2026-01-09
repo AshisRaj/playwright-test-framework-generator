@@ -12,9 +12,13 @@ const TPL = (p: string) => path.join(dirname, '..', 'templates', p);
 export async function scaffold(a: Answers) {
   const dest = path.resolve(process.cwd(), a.projectName);
 
-  const spin = ora({ spinner: 'dots' });
+  const spin = ora({
+    spinner: 'dots',
+    color: 'cyan',
+    text: `Scaffolding project: ${a.projectName}...`,
+  });
   const step = async (label: string, fn: () => Promise<void>) => {
-    spin.start(label);
+    spin.start(`\n${label}`);
     try {
       await fn();
       spin.succeed(label);
@@ -38,7 +42,7 @@ export async function scaffold(a: Answers) {
 
   // 2) Playwright structure
   await step(
-    'Add Playwright structure (src => config, data, environments, helpers, reporters, utils), playwright.config.ts)',
+    'Add Playwright structure (src => config, environments, helpers, reporters, utils), playwright.config.ts)',
     async () => {
       await renderAndCopyDir(TPL('playwright'), dest, a);
     },
@@ -54,6 +58,11 @@ export async function scaffold(a: Answers) {
       await renderAndCopyDir(
         TPL('extras/presets/web/fixtures'),
         path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/data/ui'),
+        path.join(dest, 'src', 'data', 'ui'),
         a,
       );
       await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
@@ -72,8 +81,23 @@ export async function scaffold(a: Answers) {
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/services'),
+        TPL('extras/presets/common/services/api/'),
+        path.join(dest, 'src', 'services', 'api'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/services/index.ts.ejs'),
         path.join(dest, 'src', 'services'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/data/api/'),
+        path.join(dest, 'src', 'data', 'api'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/data/index.ts.ejs'),
+        path.join(dest, 'src', 'data'),
         a,
       );
       await renderAndCopyDir(
@@ -83,8 +107,43 @@ export async function scaffold(a: Answers) {
       );
     });
   }
+  if (a.preset === 'soap') {
+    await step('Add SOAP preset (WSDL client, services, tests and fixtures)', async () => {
+      await renderAndCopyDir(
+        TPL('extras/presets/soap/fixtures'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/services/soap/'),
+        path.join(dest, 'src', 'services', 'soap'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/services/index.ts.ejs'),
+        path.join(dest, 'src', 'services'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/data/soap'),
+        path.join(dest, 'src', 'data', 'soap'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/data/index.ts.ejs'),
+        path.join(dest, 'src', 'data'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/tests/soap'),
+        path.join(dest, 'tests/soap'),
+        a,
+      );
+    });
+  }
   if (a.preset === 'hybrid') {
-    await step('Add UI + API as preset (API Server + tests + fixtures)', async () => {
+    await step('Add UI + API + SOAP as preset (API Server + tests + fixtures)', async () => {
+      // Add UI part
       await renderAndCopyDir(
         TPL('extras/presets/common/pages'),
         path.join(dest, 'src', 'pages'),
@@ -95,20 +154,38 @@ export async function scaffold(a: Answers) {
         path.join(dest, 'src', 'fixtures'),
         a,
       );
+      await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
+
+      // Also include API + SOAP artifacts for hybrid (API + SOAP)
       await renderAndCopyDir(
         TPL('extras/presets/common/server'),
         path.join(dest, 'src', 'utils'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/services'),
+        TPL('extras/presets/common/services/'),
         path.join(dest, 'src', 'services'),
         a,
       );
-      await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
+      await renderAndCopyDir(
+        TPL('extras/presets/common/services/index.ts.ejs'),
+        path.join(dest, 'src', 'services'),
+        a,
+      );
       await renderAndCopyDir(
         TPL('extras/presets/common/tests/api'),
         path.join(dest, 'tests/api'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/tests/soap'),
+        path.join(dest, 'tests/soap'),
+        a,
+      );
+      await renderAndCopyDir(TPL('extras/presets/common/data'), path.join(dest, 'src', 'data'), a);
+      await renderAndCopyDir(
+        TPL('extras/presets/common/data/index.ts.ejs'),
+        path.join(dest, 'src', 'data'),
         a,
       );
     });
@@ -225,6 +302,11 @@ export async function scaffold(a: Answers) {
           nodemailer: '^7.0.11',
           '@slack/webhook': '^7.0.6',
           '@types/nodemailer': '^7.0.4',
+        }
+      : (undefined as any)),
+    ...(a.preset === 'soap' || a.preset === 'hybrid'
+      ? {
+          'fast-xml-parser': '^5.3.3',
         }
       : (undefined as any)),
   };

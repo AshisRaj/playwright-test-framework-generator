@@ -1,0 +1,32 @@
+import { expect, test } from '@fixtures';
+
+test.use({
+  soapServiceOptions: {
+    url: 'https://www.dataaccess.com/webservicesserver/NumberConversion.wso',
+    log: true,
+  },
+});
+
+test(
+  'SOAP NumberConversion NumberToWords returns a non-empty string',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<string>(soapData.numberConversion.numberToWords);
+
+    expect(result.status).toBe(200);
+    expect(typeof result.parsed).toBe('string');
+    expect((result.parsed as string).length).toBeGreaterThan(0);
+  },
+);
+
+test(
+  'SOAP NumberConversion NumberToDollars returns a non-empty string',
+  { tag: ['@smoke', '@regression'] },
+  async ({ soapService, soapData }) => {
+    const result = await soapService.call<string>(soapData.numberConversion.numberToDollars);
+
+    expect(result.status).toBe(200);
+    expect(typeof result.parsed).toBe('string');
+    expect((result.parsed as string).length).toBeGreaterThan(0);
+  },
+);

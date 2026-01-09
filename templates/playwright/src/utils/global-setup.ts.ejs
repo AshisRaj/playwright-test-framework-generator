@@ -20,8 +20,13 @@ export default async function globalSetup(config: FullConfig) {
   // Example: load or generate tokens, cookies, etc.
   // Save to storageState or env vars if needed
   // Setup cookies for users
-  await setUpUsersCookies();
-  logger.info('User cookies setup completed');
+  await setUpUsersCookies()
+    .then(() => {
+      logger.info('✅ User cookies setup complete.');
+    })
+    .catch((error) => {
+      logger.error('Error during user cookies setup:', error);
+    });
   <% } %>
 
   logger.info('✅ Global Setup complete.');

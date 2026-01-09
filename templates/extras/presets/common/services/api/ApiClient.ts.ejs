@@ -12,7 +12,7 @@ type ClientCertificate = {
   passphrase?: string;
 };
 
-export type TestOptions = {
+export type ApiOptions = {
   apiBaseURL?: string;
   apiEndPoint?: string;
   apiHeaders?: Record<string, string>;
@@ -26,7 +26,7 @@ export class ApiClient {
   private log: boolean;
 
   constructor(
-    { apiBaseURL, apiEndPoint, apiHeaders, clientCertificates, log }: TestOptions,
+    { apiBaseURL, apiEndPoint, apiHeaders, clientCertificates, log }: ApiOptions,
     testInfo: TestInfo,
   ) {
     // newContext returns a Promise<APIRequestContext> so keep the promise here
