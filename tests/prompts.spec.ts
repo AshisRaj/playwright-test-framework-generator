@@ -44,4 +44,28 @@ describe('askQuestions (non-interactive flags mapping)', () => {
     expect(ans.preset).toBe('web');
     expect(ans.notifications).toBe(true);
   });
+
+  it('maps flags to Answers correctly for soap preset (js, npm, github, allure, husky)', async () => {
+    const flags = {
+      yes: true,
+      js: true,
+      pm: 'npm',
+      ci: 'github',
+      reporter: 'allure',
+      husky: true,
+      preset: 'soap',
+      notifications: true,
+    } as any;
+
+    const ans = await askQuestions('soapproj', flags);
+
+    expect(ans.projectName).toBe('soapproj');
+    expect(ans.language).toBe('js');
+    expect(ans.packageManager).toBe('npm');
+    expect(ans.ci).toBe('github');
+    expect(ans.reporter).toBe('allure');
+    expect(ans.husky).toBe(true);
+    expect(ans.preset).toBe('soap');
+    expect(ans.notifications).toBe(true);
+  });
 });

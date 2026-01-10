@@ -28,6 +28,7 @@ A compact set of features that this scaffold and CLI provide out of the box:
 - Page Object Model (POM): pre-built `pages/` structure and example page classes.
 - Custom fixtures and extended fixtures: reusable test setup and teardown helpers.
 - Built-in API client: utilities to call and validate backend APIs from tests.
+- SOAP preset: example SOAP/XML API test scaffold including helpers and templates for SOAP requests and responses.
 - Multiple reporters: Allure integration plus a Monocart report output template.
 - CI templates: ready-to-use GitHub and GitLab CI workflow templates.
 - Notification hooks: built-in notification scripts for test results (Slack/Teams/email).
@@ -69,6 +70,7 @@ Below is a concise description of the main files and folders in this repository.
 - `templates/base/`: Base project template used for new projects. Contains common files such as `env.example`, `package.json.ejs`, `tsconfig.json`, `README.md.ejs`, and example config files.
 - `templates/ci/`: CI pipeline templates. Subfolders include `github/` and `gitlab/` with `*.yml.ejs` workflow templates (e.g. `github-ci.yml.ejs`) — these are rendered based on the `--ci` option.
 - `templates/playwright/` and `templates/extras/`: Example Playwright configs, reporters, helpers, and optional extras that can be included when scaffolding (e.g. reporter stubs, notification scripts). These provide ready-to-use test structure and example pages/fixtures.
+  - `templates/extras/presets/`: contains additional preset packs such as `web`, `api`, `hybrid`, and `soap` (SOAP/ XML API helpers). Add new presets here when extending the generator.
 - `templates/*`: Templates may include nested folders for `playwright/src/`, `playwright/tests/`, `husky/`, and `docs/` to give scaffolded projects a complete starting layout.
 
 How to customize templates:
@@ -114,6 +116,9 @@ npx playwright-test-framework-generator init pw-tests-hybrid --reporter allure -
 
 # Or invoke the local built CLI
 node ./bin/cli.js init pw-tests-web
+
+# Example: scaffold the SOAP preset
+npx playwright-test-framework-generator init my-soap-project --preset soap --ci github
 ```
 
 ### After scaffolding:

@@ -108,6 +108,18 @@ describe('init (additional matrix)', () => {
       husky: false,
       zephyr: true,
     },
+
+    // SOAP preset coverage
+    {
+      id: 'soap-allure-npm-ts',
+      pm: 'npm',
+      reporter: 'allure',
+      ci: 'github',
+      lang: 'ts',
+      preset: 'soap',
+      husky: true,
+      zephyr: false,
+    },
     {
       id: 'web-monocart-yarn-github-ts-husky',
       pm: 'yarn',
@@ -152,6 +164,11 @@ describe('init (additional matrix)', () => {
         expect(pkg.devDependencies?.express || pkg.dependencies?.express).toBeTruthy();
       }
 
+      // SOAP preset wiring
+      if (c.preset === 'soap' || c.preset === 'hybrid') {
+        expect(pkg.devDependencies?.['fast-xml-parser']).toBeTruthy();
+      }
+
       // reporter dependencies
       if (c.reporter === 'allure') {
         expect(pkg.devDependencies?.['allure-playwright']).toBeTruthy();
@@ -184,8 +201,24 @@ describe('init (additional matrix)', () => {
         expect(exists(path.join(root, 'tests', 'api'))).toBe(true);
       }
       if (c.preset === 'hybrid') {
+        // UI artifacts
         expect(exists(path.join(root, 'src', 'pages'))).toBe(true);
+        expect(exists(path.join(root, 'tests', 'ui'))).toBe(true);
+
+        // API artifacts
         expect(exists(path.join(root, 'src', 'services'))).toBe(true);
+        expect(exists(path.join(root, 'tests', 'api'))).toBe(true);
+        expect(exists(path.join(root, 'src', 'data', 'api'))).toBe(true);
+
+        // SOAP artifacts
+        expect(exists(path.join(root, 'src', 'services', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'tests', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'src', 'data', 'soap'))).toBe(true);
+      }
+      if (c.preset === 'soap') {
+        expect(exists(path.join(root, 'src', 'services', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'tests', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'src', 'data', 'soap'))).toBe(true);
       }
     }, 120_000);
   }

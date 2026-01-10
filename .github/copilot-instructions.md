@@ -8,6 +8,7 @@ Purpose: help an AI coding assistant become productive quickly in this repositor
 
 - **What this repo is:** a CLI that scaffolds Playwright projects from EJS templates. The generator renders `templates/` into a new project folder and updates `package.json` and docs.
 - **Main flow:** CLI (`bin/cli.js`) → `src/index.ts` (command parsing) → `src/prompts.ts` (answers shape) → `src/scaffold.ts` (orchestration) → `src/render.ts` + `src/files.ts` (render & write templates).
+- **Presets included:** the generator includes example presets for `web`, `api`, `hybrid`, and `soap` (SOAP/XML API testing).
 
 2. Key entry points & files to inspect
 
@@ -18,6 +19,7 @@ Purpose: help an AI coding assistant become productive quickly in this repositor
 - `src/render.ts` — EJS-based rendering wrapper used for templates.
 - `src/files.ts` — helpers used to copy and render directories and single files into the generated project.
 - `templates/` — template source files; use `*.ejs` placeholders and keep conventions consistent with existing templates.
+- `templates/extras/presets/soap/` — SOAP preset templates and helpers; check this folder for SOAP-specific request/response helpers and example tests.
 - `husky/` — contains the committed hook scripts used in generated projects (e.g., `commit-msg`, `pre-commit`). See repository-level Husky support below.
 
 3. What changed (new things to be aware of)
@@ -26,6 +28,8 @@ Purpose: help an AI coding assistant become productive quickly in this repositor
 - **Typechecks:** The repo uses TypeScript type checking. Use `npm run typecheck` (or `tsc --noEmit`) to validate types. Tests may run typechecks as part of CI.
 - **Additional docs (`*.md`):** There are new/updated `.md` files (`CONTRIBUTING.md`, `README.md`, `docs/`), add or update these when expanding scaffolds or contributing guidance.
 - **Husky & pre-commit hooks:** Husky files live under `husky/`. Generated projects include scripts/hooks to run linters and tests pre-commit. When modifying hooks, keep the `husky/` templates in sync.
+
+- **SOAP preset:** A `soap` preset was added. See `templates/extras/presets/soap/` for SOAP-specific templates and helpers.
 
 4. Developer workflows (how to run & debug)
 
@@ -40,7 +44,7 @@ Purpose: help an AI coding assistant become productive quickly in this repositor
 5. Templates & adding presets
 
 - Templates are EJS files under `templates/`. Use `src/render.ts` and `renderAndCopyDir` helpers in `src/files.ts` to add new templated content.
-- To add a new preset: add files under `templates/extras/presets/<your-preset>/` and update `src/scaffold.ts` to call `renderAndCopyDir` for your preset (follow `web`, `api`, `hybrid` examples).
+- To add a new preset: add files under `templates/extras/presets/<your-preset>/` (for example, `templates/extras/presets/soap/`) and update `src/scaffold.ts` to call `renderAndCopyDir` for your preset (follow `web`, `api`, `hybrid`, `soap` examples).
 - When adding or changing templates that affect code quality, update `eslint.config.js`, `tsconfig.json.ejs`, and any `package.json.ejs` scripts to ensure the generated project runs `lint` and `typecheck` in CI or pre-commit hooks.
 
 6. Conventions & patterns specific to this repo
