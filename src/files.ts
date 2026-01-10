@@ -8,6 +8,15 @@ export async function ensureDir(p: string) {
 }
 
 export async function copyDir(src: string, dst: string) {
+  // If source doesn't exist, create destination dir and return silently.
+  try {
+    await fs.access(src);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err: any) {
+    await ensureDir(dst);
+    return;
+  }
+
   await ensureDir(dst);
   for (const entry of await fs.readdir(src, { withFileTypes: true })) {
     const s = path.join(src, entry.name);
@@ -18,6 +27,15 @@ export async function copyDir(src: string, dst: string) {
 }
 
 export async function renderAndCopyDir(src: string, dst: string, data: any) {
+  // If source doesn't exist, ensure destination directory exists and return.
+  try {
+    await fs.access(src);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (err: any) {
+    await ensureDir(dst);
+    return;
+  }
+
   // If `src` is a file, render/copy that single file into `dst` (which is treated
   // as a directory). Otherwise treat `src` as a directory and walk it.
   const stat = await fs.stat(src);
