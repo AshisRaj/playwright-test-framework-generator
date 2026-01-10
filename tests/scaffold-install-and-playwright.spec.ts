@@ -12,7 +12,7 @@ const scaffoldDirs = roots.flatMap((root) => {
       .filter((name) => {
         try {
           const full = join(root, name);
-          const hasPkg = existsSync(join(full, 'package.json'));
+          const hasPkg = existsSync(join(full, 'package-lock.json'));
           return prefixes.some((p) => name.startsWith(p)) && statSync(full).isDirectory() && hasPkg;
         } catch {
           return false;
