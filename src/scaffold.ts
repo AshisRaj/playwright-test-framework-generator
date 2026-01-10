@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
-import { copyDir, renderAndCopyDir, writeJSON } from './files.js';
+import { copyDir, ensureDir, renderAndCopyDir, writeJSON } from './files.js';
 import type { Answers } from './prompts.js';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -188,6 +188,10 @@ export async function scaffold(a: Answers) {
         path.join(dest, 'src', 'data'),
         a,
       );
+      // Ensure common data subfolders exist (some CI checkouts omit empty template dirs)
+      await ensureDir(path.join(dest, 'src', 'data', 'api'));
+      await ensureDir(path.join(dest, 'src', 'data', 'soap'));
+      await ensureDir(path.join(dest, 'src', 'data', 'ui'));
     });
   }
 
