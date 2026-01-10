@@ -1,14 +1,26 @@
 import { spawnSync } from 'child_process';
 import { readdirSync, readFileSync, statSync } from 'fs';
+import { tmpdir } from 'os';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 
-const root = process.cwd();
-const scaffoldDirs = readdirSync(root).filter((name) => {
+const roots = [process.cwd(), tmpdir()];
+const prefixes = ['pw-tests-', 'playwright-test-framework-generator-'];
+const scaffoldDirs = roots.flatMap((root) => {
   try {
-    return name.startsWith('pw-tests-') && statSync(join(root, name)).isDirectory();
+    return readdirSync(root)
+      .filter((name) => {
+        try {
+          return (
+            prefixes.some((p) => name.startsWith(p)) && statSync(join(root, name)).isDirectory()
+          );
+        } catch {
+          return false;
+        }
+      })
+      .map((name) => ({ name, root }));
   } catch {
-    return false;
+    return [] as Array<{ name: string; root: string }>;
   }
 });
 
@@ -17,11 +29,11 @@ describe('Scaffolded projects: install, check, and playwright', () => {
     expect(scaffoldDirs.length).toBeGreaterThan(0);
   });
 
-  for (const dir of scaffoldDirs) {
+  for (const { name, root: dirRoot } of scaffoldDirs) {
     it(
-      `${dir}: npm i -> npm run check -> npx playwright test --reporter html`,
+      `${name}: npm i -> npm run check -> npx playwright test --reporter html`,
       () => {
-        const cwd = join(root, dir);
+        const cwd = join(dirRoot, name);
 
         const run = (cmd: string, args: string[]) => {
           const res = spawnSync(cmd, args, { cwd, shell: true, encoding: 'utf8', stdio: 'pipe' });
