@@ -32,6 +32,7 @@ describe('Scaffolded projects: install, check, and playwright', () => {
   for (const { name, root: dirRoot } of scaffoldDirs) {
     it(
       `${name}: npm i -> npm run check -> npx playwright test --reporter html`,
+      { timeout: 0 },
       async () => {
         const cwd = join(dirRoot, name);
 
@@ -104,7 +105,6 @@ describe('Scaffolded projects: install, check, and playwright', () => {
           }
         }
       },
-      { timeout: 0 },
     );
   }
 });
