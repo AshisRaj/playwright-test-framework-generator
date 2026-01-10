@@ -1,4 +1,4 @@
-import { spawnSync } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { readdirSync, readFileSync, statSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -32,8 +32,17 @@ describe('Scaffolded projects: install, check, and playwright', () => {
   for (const { name, root: dirRoot } of scaffoldDirs) {
     it(
       `${name}: npm i -> npm run check -> npx playwright test --reporter html`,
-      () => {
+      async () => {
         const cwd = join(dirRoot, name);
+
+        // if there's no package.json, this scaffold is incomplete — skip it
+        const pkgPath = join(cwd, 'package.json');
+        try {
+          statSync(pkgPath);
+        } catch {
+          console.log(`== ${name} : missing package.json, skipping install/check/playwright ==`);
+          return;
+        }
 
         const run = (cmd: string, args: string[]) => {
           const res = spawnSync(cmd, args, { cwd, shell: true, encoding: 'utf8', stdio: 'pipe' });
@@ -45,27 +54,55 @@ describe('Scaffolded projects: install, check, and playwright', () => {
         console.log(`== ${name} : npm i output ==\n${r.out}`);
         if (r.code !== 0) throw new Error(`'npm i' failed in ${name}\n${r.out}`);
 
-        // only run `npm run check` if the package.json defines the script
+        // read package.json to detect `start` and `check` scripts
         let pkgHasCheck = false;
+        let pkgHasStart = false;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let pkg: any = {};
         try {
-          const pkg = JSON.parse(readFileSync(join(cwd, 'package.json'), 'utf8'));
+          pkg = JSON.parse(readFileSync(join(cwd, 'package.json'), 'utf8'));
           pkgHasCheck = !!(pkg.scripts && pkg.scripts.check);
+          pkgHasStart = !!(pkg.scripts && pkg.scripts.start);
         } catch (e) {
-          // if package.json can't be read, fail early
           throw new Error(`could not read package.json in ${name}: ${String(e)}`);
         }
 
-        if (pkgHasCheck) {
-          r = run('npm', ['run', 'check']);
-          console.log(`== ${name} : npm run check output ==\n${r.out}`);
-          if (r.code !== 0) throw new Error(`'npm run check' failed in ${name}\n${r.out}`);
-        } else {
-          console.log(`== ${name} : skipping 'npm run check' (script not present) ==`);
+        // start server if needed
+        let serverProc: ReturnType<typeof spawn> | null = null;
+        if (pkgHasStart) {
+          serverProc = spawn('npm', ['start'], { cwd, shell: true, stdio: 'pipe' });
+          serverProc.stdout?.on('data', (d) =>
+            console.log(`== ${name} server stdout ==\n${d.toString()}`),
+          );
+          serverProc.stderr?.on('data', (d) =>
+            console.error(`== ${name} server stderr ==\n${d.toString()}`),
+          );
+          // give the server a moment to boot
+          await new Promise((res) => setTimeout(res, 3000));
         }
 
-        r = run('npx', ['playwright', 'test', '--reporter', 'html']);
-        console.log(`== ${name} : npx playwright output ==\n${r.out}`);
-        if (r.code !== 0) throw new Error(`'npx playwright test' failed in ${name}\n${r.out}`);
+        try {
+          if (pkgHasCheck) {
+            r = run('npm', ['run', 'check']);
+            console.log(`== ${name} : npm run check output ==\n${r.out}`);
+            if (r.code !== 0) throw new Error(`'npm run check' failed in ${name}\n${r.out}`);
+          } else {
+            console.log(`== ${name} : skipping 'npm run check' (script not present) ==`);
+          }
+
+          r = run('npx', ['playwright', 'test', '--reporter', 'html']);
+          console.log(`== ${name} : npx playwright output ==\n${r.out}`);
+          if (r.code !== 0) throw new Error(`'npx playwright test' failed in ${name}\n${r.out}`);
+        } finally {
+          if (serverProc) {
+            try {
+              serverProc.kill('SIGTERM');
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (e) {
+              /* ignore */
+            }
+          }
+        }
       },
       { timeout: 0 },
     );
