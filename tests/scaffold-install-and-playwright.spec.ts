@@ -42,8 +42,8 @@ describe('Scaffolded projects: install, check, and playwright', () => {
         };
 
         let r = run('npm', ['i']);
-        console.log(`== ${dir} : npm i output ==\n${r.out}`);
-        if (r.code !== 0) throw new Error(`'npm i' failed in ${dir}\n${r.out}`);
+        console.log(`== ${name} : npm i output ==\n${r.out}`);
+        if (r.code !== 0) throw new Error(`'npm i' failed in ${name}\n${r.out}`);
 
         // only run `npm run check` if the package.json defines the script
         let pkgHasCheck = false;
@@ -52,20 +52,20 @@ describe('Scaffolded projects: install, check, and playwright', () => {
           pkgHasCheck = !!(pkg.scripts && pkg.scripts.check);
         } catch (e) {
           // if package.json can't be read, fail early
-          throw new Error(`could not read package.json in ${dir}: ${String(e)}`);
+          throw new Error(`could not read package.json in ${name}: ${String(e)}`);
         }
 
         if (pkgHasCheck) {
           r = run('npm', ['run', 'check']);
-          console.log(`== ${dir} : npm run check output ==\n${r.out}`);
-          if (r.code !== 0) throw new Error(`'npm run check' failed in ${dir}\n${r.out}`);
+          console.log(`== ${name} : npm run check output ==\n${r.out}`);
+          if (r.code !== 0) throw new Error(`'npm run check' failed in ${name}\n${r.out}`);
         } else {
-          console.log(`== ${dir} : skipping 'npm run check' (script not present) ==`);
+          console.log(`== ${name} : skipping 'npm run check' (script not present) ==`);
         }
 
         r = run('npx', ['playwright', 'test', '--reporter', 'html']);
-        console.log(`== ${dir} : npx playwright output ==\n${r.out}`);
-        if (r.code !== 0) throw new Error(`'npx playwright test' failed in ${dir}\n${r.out}`);
+        console.log(`== ${name} : npx playwright output ==\n${r.out}`);
+        if (r.code !== 0) throw new Error(`'npx playwright test' failed in ${name}\n${r.out}`);
       },
       { timeout: 0 },
     );
