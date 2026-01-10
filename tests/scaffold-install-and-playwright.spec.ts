@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'child_process';
-import { readdirSync, readFileSync, statSync } from 'fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
@@ -11,9 +11,9 @@ const scaffoldDirs = roots.flatMap((root) => {
     return readdirSync(root)
       .filter((name) => {
         try {
-          return (
-            prefixes.some((p) => name.startsWith(p)) && statSync(join(root, name)).isDirectory()
-          );
+          const full = join(root, name);
+          const hasPkg = existsSync(join(full, 'package.json'));
+          return prefixes.some((p) => name.startsWith(p)) && statSync(full).isDirectory() && hasPkg;
         } catch {
           return false;
         }
