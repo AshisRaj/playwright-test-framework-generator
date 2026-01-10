@@ -21,6 +21,7 @@ export class SoapClient {
     this.testInfo = testInfo;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async call<T = any>(
     options?: SoapOptions,
   ): Promise<{

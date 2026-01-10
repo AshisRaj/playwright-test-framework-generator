@@ -236,7 +236,8 @@ export default defineConfig({
   // Shared options
   use: {
     // baseURL: process.env.BASE_URL || "https://example.com",
-    baseURL: 'http://localhost:3000',
+    // prefer base URL from env, fallback to localhost for local dev
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: "off",
     video: "off",
     screenshot: "only-on-failure"

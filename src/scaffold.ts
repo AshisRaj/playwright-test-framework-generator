@@ -65,6 +65,11 @@ export async function scaffold(a: Answers) {
         path.join(dest, 'src', 'data', 'ui'),
         a,
       );
+      await renderAndCopyDir(
+        TPL('extras/presets/common/data/index.ts.ejs'),
+        path.join(dest, 'src', 'data'),
+        a,
+      );
       await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
     });
   }

@@ -1,11 +1,13 @@
+<% if (preset === 'web' || preset === 'hybrid') { %>
 import fs from 'fs';
 import { resolve } from 'path';
+<% } %>
 
 import { <% if (preset === 'web' || preset === 'hybrid' ) { %>chromium, expect, <% } %> FullConfig} from '@playwright/test';
-import { ARTIFACTS_DIR, logger } from '@utils';
+import { <% if (preset === 'web' || preset === 'hybrid' ) { %>ARTIFACTS_DIR,<% } %> logger } from '@utils';
 
 /**
- * Global Setup – runs once before all tests.
+ * Global Setup - runs once before all tests.
  * Useful for tasks like authentication, environment prep, or seeding test data.
  */
 export default async function globalSetup(config: FullConfig) {

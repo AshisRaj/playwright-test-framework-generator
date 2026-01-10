@@ -2,7 +2,8 @@ import { ARTIFACTS_DIR, logger } from '@utils';
 import { resolve } from 'path';
 import { rimraf } from 'rimraf';
 
-const cookiesFileName = `${process.env.USER}_cookies.json`;
+
+const cookiesFileName = `${process.env.USERNAME}_cookies.json`;
 const storageStateFilePath = resolve(ARTIFACTS_DIR, `cookies/${cookiesFileName}`);
 
 /**

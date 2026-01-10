@@ -9,17 +9,13 @@ import { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from '@pag
 import type { Page, TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
 import { ApiClient, SoapClient, type ApiOptions, type SoapOptions } from '@services';
-import { ARTIFACTS_DIR, loadSessionCookies, logger } from '@utils';
+import { ARTIFACTS_DIR <% if (preset !== 'hybrid' ) { %>, logger<% } %> } from '@utils';
 import path from 'path';
 
 const COOKIES_DIR = path.join(ARTIFACTS_DIR, 'cookies');
 
-// Keep your existing env naming
-const storageStatePath = path.resolve(COOKIES_DIR, `${process.env.USERNAME}_cookies.json`);
-
-// ---- Auth mode switch (FORM | SESSION | COOKIES) ----
-type AuthMode = 'FORM' | 'SESSION' | 'COOKIES';
-const AUTH_MODE = (process.env.AUTH_MODE?.toUpperCase() as AuthMode) || 'FORM';
+// ---- Auth mode switch (FORM | SESSION) ----
+type AuthMode = 'FORM' | 'SESSION';
 
 export const test = baseTest.extend<Fixtures>({
   // Allow tests to optionally provide API client options via `test.use({ apiServiceOptions: { ... } })`
@@ -79,40 +75,35 @@ export const test = baseTest.extend<Fixtures>({
     });
   },
 
-  /**
-   * Checkout test data fixture
-   * - Loads from ./data/Checkout.ts (typed import)
-   * - Available as `{ checkoutData }` in all tests
-   */
-  checkoutData: async ({}, use) => {
-    await use(checkoutData);
+  // Authenticated
+  page: async ({ browser }, use) => {
+    const AUTH_MODE = (process.env.AUTH_MODE?.toUpperCase() as AuthMode) || 'FORM';
+
+    // SESSION — reuse saved storageState (cookies, localStorage)
+    if (AUTH_MODE === 'SESSION') {
+      const storageStatePath = path.resolve(COOKIES_DIR, `${process.env.USERNAME}_cookies.json`);
+      const context = await browser.newContext({ storageState: storageStatePath });
+      const page = await context.newPage();
+      await use(page);
+      await page.close();
+      await context.close();
+    }
+
+    // FORM (default) — regular fresh page
+    if (AUTH_MODE === 'FORM') {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      const loginPage = new LoginPage(page);
+      await loginPage.navigation.goToLoginPage();
+      await loginPage.login(process.env.USERNAME!, process.env.USERPASSWORD!);
+      await use(page);
+      await page.close();
+      await context.close();
+    }
   },
 
-  /**
-   * A single "authedPage" that guarantees the built-in `page` is authenticated
-   * regardless of the chosen AUTH_MODE. All POs are built on top of this.
-   */
+  // authedPage simply proxies to the `page` fixture so existing POs work
   authedPage: async ({ page }, use) => {
-    if (AUTH_MODE === 'SESSION') {
-      // Already authed via storageState
-      await use(page);
-      return;
-    }
-
-    if (AUTH_MODE === 'COOKIES') {
-      // Inject cookies into current page (your helper)
-      await loadSessionCookies(page, storageStatePath);
-      // Hit the app so cookies apply to the domain (baseURL recommended in config)
-      await page.goto('/');
-      await use(page);
-      return;
-    }
-
-    logger.info(`AUTH MODE: ${AUTH_MODE}`);
-    // Default: FORM login on the same built-in page
-    const loginPage = new LoginPage(page);
-    await loginPage.navigation.goToLoginPage();
-    await loginPage.login(process.env.USERNAME!, process.env.USERPASSWORD!);
     await use(page);
   },
 
@@ -131,6 +122,15 @@ export const test = baseTest.extend<Fixtures>({
 
   checkoutPage: async ({ authedPage }, use) => {
     await use(new CheckoutPage(authedPage));
+  },
+
+  /**
+   * Checkout test data fixture
+   * - Loads from ./data/checkout.ts (typed import)
+   * - Available as `{ checkoutData }` in all tests
+   */
+  checkoutData: async ({}, use) => {
+    await use(checkoutData);
   },
 
   // Page objects as fixtures

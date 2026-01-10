@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { logger, PROJECT_ROOT, <% if (reporter === "monocart") { %>MONOCART_REPORT_DIR <% } else if (reporter === "allure") { %>ALLURE_REPORT_DIR, REPORTS_DIR <% } else { %>HTML_REPORTS_DIR <% } %>} from '@utils';
+import { logger, PROJECT_ROOT, <% if (reporter === "monocart") { %>MONOCART_REPORT_DIR <% } else if (reporter === "allure") { %>REPORTS_DIR <% } else { %>HTML_REPORTS_DIR <% } %>} from '@utils';
 import { execSync } from 'child_process';
 import { Command } from 'commander';
 import fs from 'fs';

@@ -15,7 +15,8 @@
     "codegen": "playwright codegen",
     "fmt": "prettier -w . --ignore-pattern .prettierignore",
     "lint": "eslint . --fix --max-warnings 0 --no-cache",
-    "syntax-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint",
     "logs:clean": "rimraf artifacts/logs"<% if (notifications === true) { %>,
     "notify-report": "tsx src/tools/notifications/notifications.ts --env dev --email True --slack True",
     "run-and-notify": "npm run run:headed && npm run notify-report"
