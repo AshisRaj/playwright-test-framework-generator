@@ -1,83 +1,48 @@
-<!-- .github/copilot-instructions.md - Guidance for AI coding agents working on this repo -->
+<!-- .github/copilot-instructions.md - Concise guidance for AI coding agents -->
 
-# Playwright Test Framework Generator — Agent Instructions
+# Playwright Test Framework Generator — Quick Agent Guide
 
-Purpose: help an AI coding assistant become productive quickly in this repository. Focus on the generator architecture, conventions, workflows, and concrete edit points — now including linting, typechecking, docs, and pre-commit hooks.
+Purpose: get an AI coding agent productive fast. This file highlights the repo's architecture, workflows, patterns, and exact edit points you will use when making changes.
 
-1. Big picture
+**Big Picture:**
+- CLI scaffolder that renders `templates/` (EJS) into a target project and updates `package.json`/docs.
+- Main runtime flow: `bin/cli.js` -> `dist/index.js` (build) -> `src/index.ts` (args) -> `src/prompts.ts` (Answers) -> `src/scaffold.ts` -> `src/render.ts` + `src/files.ts` (render + write).
 
-- **What this repo is:** a CLI that scaffolds Playwright projects from EJS templates. The generator renders `templates/` into a new project folder and updates `package.json` and docs.
-- **Main flow:** CLI (`bin/cli.js`) → `src/index.ts` (command parsing) → `src/prompts.ts` (answers shape) → `src/scaffold.ts` (orchestration) → `src/render.ts` + `src/files.ts` (render & write templates).
-- **Presets included:** the generator includes example presets for `web`, `api`, `hybrid`, and `soap` (SOAP/XML API testing).
+**Key Files to Open First:**
+- `src/prompts.ts`: canonical `Answers` type and flags used by templates.
+- `src/scaffold.ts`: orchestration — how presets are chosen and how package.json is mutated.
+- `src/render.ts` and `src/files.ts`: EJS rendering helpers and `renderAndCopyDir` usage.
+- `templates/`: inspect `templates/base/`, `templates/playwright/`, and `templates/extras/presets/` (e.g., `soap/`).
+- `bin/cli.js`: how the built CLI is executed (`dist/` required).
 
-2. Key entry points & files to inspect
+**Developer Workflows / Commands:**
+- Build the CLI: `npm run build` (produces `dist/`).
+- Local run (after build): `node ./bin/cli.js init my-tests --preset hybrid --reporter allure --ci github`.
+- Fast dev loop: `npm run dev` (watcher), then run the CLI in another shell after compile.
+- Lint: `npm run lint` (root). For generated projects: `npm --prefix ./path/to/generated run lint`.
+- Typecheck: `npm run typecheck` or `npx tsc --noEmit`.
+- Tests: `npx vitest` or `npm test`.
+- Enable Husky hooks locally: `npx husky install` (or `npm run prepare`).
 
-- `bin/cli.js` — runtime entry that loads `dist/index.js` after build.
-- `src/index.ts` — CLI definitions and flags (options like `--preset`, `--reporter`, `--ci`, `--pm`, `--js`).
-- `src/prompts.ts` — canonical `Answers` shape used across the codebase; update this when changing template variables.
-- `src/scaffold.ts` — primary orchestration: copies/renders template directories and mutates the target `package.json`.
-- `src/render.ts` — EJS-based rendering wrapper used for templates.
-- `src/files.ts` — helpers used to copy and render directories and single files into the generated project.
-- `templates/` — template source files; use `*.ejs` placeholders and keep conventions consistent with existing templates.
-- `templates/extras/presets/soap/` — SOAP preset templates and helpers; check this folder for SOAP-specific request/response helpers and example tests.
-- `husky/` — contains the committed hook scripts used in generated projects (e.g., `commit-msg`, `pre-commit`). See repository-level Husky support below.
+**Templates & Presets:**
+- Add a preset: create `templates/extras/presets/<name>/` and add a call in `src/scaffold.ts` using `renderAndCopyDir`.
+- Template variables come from the `Answers` object in `src/prompts.ts` — change both when adding variables.
+- Keep `templates/base/package.json.ejs`, `tsconfig.json.ejs`, and `eslint` settings in sync with generated project expectations.
 
-3. What changed (new things to be aware of)
+**Conventions & Gotchas:**
+- ESM + TypeScript: `package.json` uses `type: "module"` and built JS imports include `.js` extensions (see `bin/cli.js`).
+- The scaffolder mutates `package.json` programmatically in `src/scaffold.ts` — prefer editing that file if you need different dependency wiring.
+- Templates may rely on helper files under `templates/playwright/` and `templates/extras/` — copy helpers as-is when adding presets.
 
-- **Linters:** ESLint is configured in `eslint.config.js` and templates include `eslint` rules. Use `npm run lint` to lint the generator codebase and `npm --prefix <generated-project> run lint` for generated projects.
-- **Typechecks:** The repo uses TypeScript type checking. Use `npm run typecheck` (or `tsc --noEmit`) to validate types. Tests may run typechecks as part of CI.
-- **Additional docs (`*.md`):** There are new/updated `.md` files (`CONTRIBUTING.md`, `README.md`, `docs/`), add or update these when expanding scaffolds or contributing guidance.
-- **Husky & pre-commit hooks:** Husky files live under `husky/`. Generated projects include scripts/hooks to run linters and tests pre-commit. When modifying hooks, keep the `husky/` templates in sync.
+**Husky & CI:**
+- Hook templates live in `husky/` (used as templates for generated projects).
+- CI templates for generated projects are under `templates/ci/` (GitHub/GitLab examples).
 
-- **SOAP preset:** A `soap` preset was added. See `templates/extras/presets/soap/` for SOAP-specific templates and helpers.
+**Debugging Tips:**
+- Run the CLI against a temporary directory to inspect outputs (`node ./bin/cli.js init /tmp/x --preset web`).
+- Add `console.log` or throw inside `src/scaffold.ts` steps to surface errors (steps wrapped with `ora` spinners).
+- For rendering issues, import and call `src/render.ts` from a small Node script to reproduce.
 
-4. Developer workflows (how to run & debug)
+**Quick grep targets:** `src/scaffold.ts`, `src/prompts.ts`, `src/render.ts`, `src/files.ts`, `templates/`, `husky/`, `eslint.config.js`.
 
-- Build the CLI (recommended before running locally): `npm run build` (outputs `dist/`).
-- Run the CLI locally without a global install: `node ./bin/cli.js init my-tests --preset hybrid --reporter allure --ci github`.
-- Fast iteration during development: run `npm run dev` (TypeScript watcher) and in another shell run the local CLI after compile completes.
-- Linting: `npm run lint` (project root). For a generated project: `npm --prefix ./path/to/generated run lint`.
-- Typechecking: `npm run typecheck` or `npx tsc --noEmit`.
-- Husky: to enable local hooks after cloning, run `npx husky install` (or `npm run prepare` if a `prepare` script exists). Pre-commit hooks will run automatically on commit.
-- Unit tests: `npx vitest` or `npm test`.
-
-5. Templates & adding presets
-
-- Templates are EJS files under `templates/`. Use `src/render.ts` and `renderAndCopyDir` helpers in `src/files.ts` to add new templated content.
-- To add a new preset: add files under `templates/extras/presets/<your-preset>/` (for example, `templates/extras/presets/soap/`) and update `src/scaffold.ts` to call `renderAndCopyDir` for your preset (follow `web`, `api`, `hybrid`, `soap` examples).
-- When adding or changing templates that affect code quality, update `eslint.config.js`, `tsconfig.json.ejs`, and any `package.json.ejs` scripts to ensure the generated project runs `lint` and `typecheck` in CI or pre-commit hooks.
-
-6. Conventions & patterns specific to this repo
-
-- ESM + TypeScript: `package.json` uses `type: \"module\"`. Built JS files target ESM and import paths include `.js` extension (see `bin/cli.js`).
-- Template variables: the generator relies on the `Answers` structure returned by `src/prompts.ts`. When adding template variables, update `prompts` and the `Answers` typing.
-- Dependency wiring: `src/scaffold.ts` programmatically merges dependencies into the generated project's `package.json`. Modify that logic if you need to change how dependencies or devDependencies are injected.
-
-7. Husky and pre-commit hooks (practical notes)
-
-- Location: repository-level hook templates are in `husky/` (for use in generated projects and guidance).
-- Typical pre-commit tasks: run `npm run lint`, `npm run typecheck` (optional), and lightweight tests. Keep hooks fast — prefer lint-staged for staged-only checks.
-- Installing hooks locally after cloning: run `npx husky install` or `npm run prepare`. CI runs do not require Husky.
-
-8. Debugging tips
-
-- Inspect the temporary `dest` directory created by the scaffold (the generator writes directly to `process.cwd()` + project name). Run the CLI with a disposable folder.
-- Use `console.log` or throw from `src/scaffold.ts` step handlers to reveal failing render/copy operations. Steps are wrapped in `ora` spinners so failures are visible.
-- For template rendering issues, render a single file using a small Node snippet that imports `src/render.ts`.
-- If lint errors appear, run `npm run lint -- --fix` where appropriate; for type errors, run `npm run typecheck` and fix TypeScript issues.
-
-9. Tests & CI notes
-
-- Internal tests live under `tests/` and use `vitest`. Run `npx vitest` locally.
-- CI workflows live under `templates/ci/` for generated projects. These templates include lint and typecheck steps; update them when changing lint or typecheck behavior.
-
-10. Useful grep targets (quick jump list)
-
-- `src/scaffold.ts` — orchestration and presets
-- `src/prompts.ts` — answers/flags
-- `templates/base/package.json.ejs` — base package script templates
-- `templates/playwright/` — default Playwright layout used by scaffolds
-- `eslint.config.js` — linter rules and conventions
-- `husky/` — hook templates used by generated projects
-
-If anything in these instructions is unclear or you want a walkthrough (e.g., adding a preset, extending hooks, or adding CI lint/typecheck steps), tell me which part and I will iterate.
+If you want, I can: update a preset, add a new template, or walk through adding CI/lint steps — tell me which and I'll implement it.
