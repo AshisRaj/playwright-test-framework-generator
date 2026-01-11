@@ -1,6 +1,18 @@
 import type { ApiClient, ApiOptions } from '@services';
+import {
+  contactsData,
+  profilesData,
+  usersData,
+} from '@data';
 
 export type Fixtures = {
   apiService: ApiClient;
   apiServiceOptions: ApiOptions;
+
+  // API test data
+  apiData: {
+    contacts: typeof contactsData;
+    users: typeof usersData;
+    profiles: typeof profilesData;
+  };
 };

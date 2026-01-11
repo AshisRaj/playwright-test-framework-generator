@@ -1,36 +1,59 @@
 import { expect, test } from '@fixtures';
+import { APIResponse } from '@playwright/test';
 
 let userId: number;
 
-test('Create user', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
-  const response = await apiService.post('/users', {
-    data: {
-      name: 'Ashis Raj',
-      email: 'ashis@example.com',
-    },
+test('Create user', { tag: ['@smoke', '@regression'] }, async ({ apiService, apiData }) => {
+  let response: APIResponse;
+
+  await test.step('Send create user request', async () => {
+    response = await apiService.post('/users', apiData.users.newUser);
   });
 
-  expect(response.status()).toBe(201);
-  const body = await response.json();
+  await test.step('Verify create user response', async () => {
+    expect(response.status()).toBe(201);
+    const body = await response.json();
 
-  userId = body.id;
-  expect(body.data.name).toBe('Ashis Raj');
+    userId = body.id;
+    expect(body.data.name).toBe('Ashis Raj');
+  });
 });
 
 test('Get all users', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
-  const response = await apiService.get('/users');
-  expect(response.status()).toBe(200);
+  let response: APIResponse;
 
-  const users = await response.json();
-  expect(users.length).toBeGreaterThan(0);
+  await test.step('Fetch all users', async () => {
+    response = await apiService.get('/users');
+  });
+
+  await test.step('Verify users list', async () => {
+    expect(response.status()).toBe(200);
+
+    const users = await response.json();
+    expect(users.length).toBeGreaterThan(0);
+  });
 });
 
 test('Get user by ID', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
-  const response = await apiService.get(`/users/${userId}`);
-  expect(response.status()).toBe(200);
+  let response: APIResponse;
+
+  await test.step('Fetch user by ID', async () => {
+    response = await apiService.get(`/users/${userId}`);
+  });
+
+  await test.step('Verify user fetch response', async () => {
+    expect(response.status()).toBe(200);
+  });
 });
 
 test('Delete user', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
-  const response = await apiService.delete(`/users/${userId}`);
-  expect(response.status()).toBe(200);
+  let response: APIResponse;
+
+  await test.step('Send delete user request', async () => {
+    response = await apiService.delete(`/users/${userId}`);
+  });
+
+  await test.step('Verify delete response', async () => {
+    expect(response.status()).toBe(200);
+  });
 });

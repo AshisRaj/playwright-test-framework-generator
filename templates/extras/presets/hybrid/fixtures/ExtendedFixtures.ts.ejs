@@ -1,8 +1,11 @@
 import {
   calculatorSoapData,
   checkoutData,
+  contactsData,
   countryInfoSoapData,
   numberConversionSoapData,
+  profilesData,
+  usersData,
 } from '@data';
 import { Fixtures } from '@fixtures';
 import { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from '@pages';
@@ -67,11 +70,29 @@ export const test = baseTest.extend<Fixtures>({
     await client.dispose();
   },
 
+  //**
+  * SOAP test data fixture
+  * - Loads from ./data/soap/*.ts (typed import)
+  * - Available as `{ soapData }` in all tests
+  */
   soapData: async ({}, use) => {
     await use({
       calculator: calculatorSoapData,
       countryInfo: countryInfoSoapData,
       numberConversion: numberConversionSoapData,
+    });
+  },
+
+  /**
+   * API test data fixture
+   * - Loads from ./data/api/*.ts (typed import)
+   * - Available as `{ apiData }` in all tests
+   */
+  apiData: async ({}, use) => {
+    await use({
+      contacts: contactsData,
+      users: usersData,
+      profiles: profilesData,
     });
   },
 

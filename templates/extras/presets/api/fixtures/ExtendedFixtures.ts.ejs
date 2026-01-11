@@ -1,3 +1,8 @@
+import {
+  contactsData,
+  profilesData,
+  usersData,
+} from '@data';
 import { Fixtures } from '@fixtures';
 import type { TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
@@ -26,6 +31,19 @@ export const test = baseTest.extend<Fixtures>({
     const client = new ApiClient(options, testInfo);
     await use(client);
     await client.dispose();
+  },
+
+  /**
+   * API test data fixture
+   * - Loads from ./data/api/*.ts (typed import)
+   * - Available as `{ apiData }` in all tests
+   */
+  apiData: async ({}, use) => {
+    await use({
+      contacts: contactsData,
+      users: usersData,
+      profiles: profilesData,
+    });
   },
 });
 

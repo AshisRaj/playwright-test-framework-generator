@@ -1,4 +1,5 @@
 import { expect, test } from '@fixtures';
+import { APIResponse } from '@playwright/test';
 
 test.use({
   apiServiceOptions: {
@@ -11,10 +12,16 @@ test(
   'Health check should return OK',
   { tag: ['@smoke', '@regression'] },
   async ({ apiService }) => {
-    const response = await apiService.get('/health');
+    let response: APIResponse;
 
-    expect(response.status()).toBe(200);
-    const body = await response.json();
-    expect(body.status).toBe('OK');
+    await test.step('Call /health endpoint', async () => {
+      response = await apiService.get('/health');
+    });
+
+    await test.step('Verify health response', async () => {
+      expect(response.status()).toBe(200);
+      const body = await response.json();
+      expect(body.status).toBe('OK');
+    });
   },
 );

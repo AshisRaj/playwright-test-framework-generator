@@ -1,20 +1,33 @@
 import { expect, test } from '@fixtures';
+import { APIResponse } from '@playwright/test';
 
-const userId = 111;
+test('Create profile', { tag: ['@smoke', '@regression'] }, async ({ apiService, apiData }) => {
+  let response: APIResponse;
 
-test('Create profile', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
-  const response = await apiService.post('/profiles', {
-    userId,
-    designation: 'Principal SDET',
-    experience: 15,
+  await test.step('Send create profile request', async () => {
+    response = await apiService.post('/profiles', apiData.profiles.newProfile);
   });
-  expect(response.status()).toBe(201);
+
+  await test.step('Verify profile creation response', async () => {
+    expect(response.status()).toBe(201);
+  });
 });
 
-test('Get profile by userId', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
-  const response = await apiService.get(`/profiles/${userId}`);
-  expect(response.status()).toBe(200);
+test(
+  'Get profile by userId',
+  { tag: ['@smoke', '@regression'] },
+  async ({ apiService, apiData }) => {
+    let response: APIResponse;
 
-  const profile = await response.json();
-  expect(profile.designation).toBe('Principal SDET');
-});
+    await test.step('Fetch profile by userId', async () => {
+      response = await apiService.get(`/profiles/${apiData.profiles.userId}`);
+    });
+
+    await test.step('Verify profile details', async () => {
+      expect(response.status()).toBe(200);
+
+      const profile = await response.json();
+      expect(profile.designation).toBe('Principal SDET');
+    });
+  },
+);

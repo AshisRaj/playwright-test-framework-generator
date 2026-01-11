@@ -3,8 +3,14 @@ import type { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from 
 import { Page } from '@playwright/test';
 import type { ApiClient, ApiOptions, SoapClient, SoapOptions } from '@services';
 
-import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData } from '@data';
-
+import {
+  calculatorSoapData,
+  contactsData,
+  countryInfoSoapData,
+  numberConversionSoapData,
+  profilesData,
+  usersData,
+} from '@data';
 
 export type Fixtures = {
   // Services
@@ -13,12 +19,21 @@ export type Fixtures = {
   apiServiceOptions: ApiOptions;
   soapServiceOptions: SoapOptions;
 
-  // Test Data
+  // API test data
+  apiData: {
+    contacts: typeof contactsData;
+    users: typeof usersData;
+    profiles: typeof profilesData;
+  };
+
+  // SOAP test data
   soapData: {
     calculator: typeof calculatorSoapData;
     countryInfo: typeof countryInfoSoapData;
     numberConversion: typeof numberConversionSoapData;
   };
+
+  // UI test data
   checkoutData: CheckoutDataset;
 
   // Pages

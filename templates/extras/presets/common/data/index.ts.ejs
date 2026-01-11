@@ -6,3 +6,10 @@ export * from './soap/NumberConversion';
 <% if (preset === 'web' || preset === 'hybrid') { %>
 export * from './ui/Checkout';
 <% } %>
+// API test data
+<% if (preset === 'api' || preset === 'hybrid') { %>
+export * from './api/contacts';
+export * from './api/profiles';
+export * from './api/users';
+<% } %>
+

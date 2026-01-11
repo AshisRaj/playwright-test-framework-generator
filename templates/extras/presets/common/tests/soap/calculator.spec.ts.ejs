@@ -1,14 +1,20 @@
-import { logger } from '@utils';
 import { expect, test } from '@fixtures';
+import { logger } from '@utils';
 
 test(
   'SOAP Calculator Add',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData }) => {
-    const result = await soapService.call<number>(soapData.calculator.add);
+    let result: { status: number; rawBody?: string; parsed?: number };
 
-    expect(result.status).toBe(200);
-    expect(result.parsed).toBe(5);
+    await test.step('Call calculator.add SOAP operation', async () => {
+      result = await soapService.call<number>(soapData.calculator.add);
+    });
+
+    await test.step('Verify add result', async () => {
+      expect(result.status).toBe(200);
+      expect(result.parsed).toBe(5);
+    });
   },
 );
 
@@ -16,13 +22,19 @@ test(
   'SOAP Calculator Subtract',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData }) => {
-    const result = await soapService.call<number>(soapData.calculator.subtract);
+    let result: { status: number; rawBody?: string; parsed?: number };
 
-    logger.info('Raw SOAP Response:', result.rawBody);
-    logger.info('Parsed Result:', result.parsed);
+    await test.step('Call calculator.subtract SOAP operation', async () => {
+      result = await soapService.call<number>(soapData.calculator.subtract);
+    });
 
-    expect(result.status).toBe(200);
-    expect(result.parsed).toBe(6);
+    await test.step('Log and verify subtract result', async () => {
+      logger.info('Raw SOAP Response:', result.rawBody);
+      logger.info('Parsed Result:', result.parsed);
+
+      expect(result.status).toBe(200);
+      expect(result.parsed).toBe(6);
+    });
   },
 );
 
@@ -30,13 +42,19 @@ test(
   'SOAP Calculator Multiply',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData }) => {
-    const result = await soapService.call<number>(soapData.calculator.multiply);
+    let result: { status: number; rawBody?: string; parsed?: number };
 
-    logger.info('Raw SOAP Response:', result.rawBody);
-    logger.info('Parsed Result:', result.parsed);
+    await test.step('Call calculator.multiply SOAP operation', async () => {
+      result = await soapService.call<number>(soapData.calculator.multiply);
+    });
 
-    expect(result.status).toBe(200);
-    expect(result.parsed).toBe(42);
+    await test.step('Log and verify multiply result', async () => {
+      logger.info('Raw SOAP Response:', result.rawBody);
+      logger.info('Parsed Result:', result.parsed);
+
+      expect(result.status).toBe(200);
+      expect(result.parsed).toBe(42);
+    });
   },
 );
 
@@ -44,12 +62,18 @@ test(
   'SOAP Calculator Divide',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData }) => {
-    const result = await soapService.call<number>(soapData.calculator.divide);
+    let result: { status: number; rawBody?: string; parsed?: number };
 
-    logger.info('Raw SOAP Response:', result.rawBody);
-    logger.info('Parsed Result:', result.parsed);
+    await test.step('Call calculator.divide SOAP operation', async () => {
+      result = await soapService.call<number>(soapData.calculator.divide);
+    });
 
-    expect(result.status).toBe(200);
-    expect(result.parsed).toBe(5);
+    await test.step('Log and verify divide result', async () => {
+      logger.info('Raw SOAP Response:', result.rawBody);
+      logger.info('Parsed Result:', result.parsed);
+
+      expect(result.status).toBe(200);
+      expect(result.parsed).toBe(5);
+    });
   },
 );
