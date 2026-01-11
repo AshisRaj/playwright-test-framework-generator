@@ -1,10 +1,11 @@
 import { expect, test } from '@fixtures';
+import { validateSoapResponse } from '@services';
 import { logger } from '@utils';
 
 test(
   'SOAP Calculator Add',
   { tag: ['@smoke', '@regression'] },
-  async ({ soapService, soapData }) => {
+  async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
 
     await test.step('Call calculator.add SOAP operation', async () => {
@@ -15,13 +16,17 @@ test(
       expect(result.status).toBe(200);
       expect(result.parsed).toBe(5);
     });
+
+    await test.step('Validate add result schema', async () => {
+      await validateSoapResponse(soapSchemas.calculatorSchema, result.parsed);
+    });
   },
 );
 
 test(
   'SOAP Calculator Subtract',
   { tag: ['@smoke', '@regression'] },
-  async ({ soapService, soapData }) => {
+  async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
 
     await test.step('Call calculator.subtract SOAP operation', async () => {
@@ -35,13 +40,17 @@ test(
       expect(result.status).toBe(200);
       expect(result.parsed).toBe(6);
     });
+
+    await test.step('Validate subtract result schema', async () => {
+      await validateSoapResponse(soapSchemas.calculatorSchema, result.parsed);
+    });
   },
 );
 
 test(
   'SOAP Calculator Multiply',
   { tag: ['@smoke', '@regression'] },
-  async ({ soapService, soapData }) => {
+  async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
 
     await test.step('Call calculator.multiply SOAP operation', async () => {
@@ -55,13 +64,17 @@ test(
       expect(result.status).toBe(200);
       expect(result.parsed).toBe(42);
     });
+
+    await test.step('Validate multiply result schema', async () => {
+      await validateSoapResponse(soapSchemas.calculatorSchema, result.parsed);
+    });
   },
 );
 
 test(
   'SOAP Calculator Divide',
   { tag: ['@smoke', '@regression'] },
-  async ({ soapService, soapData }) => {
+  async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
 
     await test.step('Call calculator.divide SOAP operation', async () => {
@@ -74,6 +87,10 @@ test(
 
       expect(result.status).toBe(200);
       expect(result.parsed).toBe(5);
+    });
+
+    await test.step('Validate divide result schema', async () => {
+      await validateSoapResponse(soapSchemas.calculatorSchema, result.parsed);
     });
   },
 );

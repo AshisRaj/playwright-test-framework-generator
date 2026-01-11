@@ -1,4 +1,4 @@
-import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData } from '@data';
+import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData, calculatorSchema, capitalCitySchema, countryNameSchema, numberToWordsSchema, numberToDollarsSchema } from '@data';
 import { Fixtures } from '@fixtures';
 import type { TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
@@ -40,6 +40,20 @@ export const test = baseTest.extend<Fixtures>({
       calculator: calculatorSoapData,
       countryInfo: countryInfoSoapData,
       numberConversion: numberConversionSoapData,
+    });
+  },
+
+  /**
+  * SOAP schemas fixture
+  * - Available as `{ soapSchemas }` in all tests
+  */
+  soapSchemas: async ({}, use) => {
+    await use({
+      calculatorSchema: calculatorSchema,
+      capitalCitySchema: capitalCitySchema,
+      countryNameSchema: countryNameSchema,
+      numberToWordsSchema: numberToWordsSchema,
+      numberToDollarsSchema: numberToDollarsSchema,
     });
   },
 });

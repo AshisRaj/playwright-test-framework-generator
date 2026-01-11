@@ -1,0 +1,34 @@
+import { expect, test } from '@fixtures';
+import { validateSoapResponse } from '@services';
+
+test(
+  'Validation should fail for empty CapitalCity',
+  { tag: ['@negative'] },
+  async ({ soapSchemas }) => {
+    await expect(validateSoapResponse(soapSchemas.capitalCitySchema, '')).rejects.toThrow();
+  },
+);
+
+test(
+  'Validation should fail for numeric country name',
+  { tag: ['@negative'] },
+  async ({ soapSchemas }) => {
+    await expect(validateSoapResponse(soapSchemas.countryNameSchema, 123)).rejects.toThrow();
+  },
+);
+
+test(
+  'Validation should fail for NumberToWords numeric response',
+  { tag: ['@negative'] },
+  async ({ soapSchemas }) => {
+    await expect(validateSoapResponse(soapSchemas.numberToWordsSchema, 100)).rejects.toThrow();
+  },
+);
+
+test(
+  'Validation should fail for NumberToDollars missing dollar keyword',
+  { tag: ['@negative'] },
+  async ({ soapSchemas }) => {
+    await expect(validateSoapResponse(soapSchemas.numberToDollarsSchema, '100')).rejects.toThrow();
+  },
+);

@@ -11,6 +11,19 @@ import {
   profilesData,
   usersData,
 } from '@data';
+import {
+  userSchema,
+  usersListSchema,
+  profileSchema,
+  contactSchema,
+  contactsListSchema,
+  healthSchema,
+  calculatorSchema,
+  capitalCitySchema,
+  countryNameSchema,
+  numberToWordsSchema,
+  numberToDollarsSchema,
+} from '@data';
 
 export type Fixtures = {
   // Services
@@ -26,11 +39,30 @@ export type Fixtures = {
     profiles: typeof profilesData;
   };
 
+  // API schemas
+  apiSchemas: {
+    userSchema: typeof userSchema;
+    usersListSchema: typeof usersListSchema;
+    profileSchema: typeof profileSchema;
+    contactSchema: typeof contactSchema;
+    contactsListSchema: typeof contactsListSchema;
+    healthSchema: typeof healthSchema;
+  };
+
   // SOAP test data
   soapData: {
     calculator: typeof calculatorSoapData;
     countryInfo: typeof countryInfoSoapData;
     numberConversion: typeof numberConversionSoapData;
+  };
+
+  // SOAP schemas
+  soapSchemas: {
+    calculatorSchema: typeof calculatorSchema;
+    capitalCitySchema: typeof capitalCitySchema;
+    countryNameSchema: typeof countryNameSchema;
+    numberToWordsSchema: typeof numberToWordsSchema;
+    numberToDollarsSchema: typeof numberToDollarsSchema;
   };
 
   // UI test data

@@ -2,6 +2,12 @@ import {
   contactsData,
   profilesData,
   usersData,
+  userSchema,
+  usersListSchema,
+  profileSchema,
+  contactSchema,
+  contactsListSchema,
+  healthSchema,
 } from '@data';
 import { Fixtures } from '@fixtures';
 import type { TestInfo } from '@playwright/test';
@@ -43,6 +49,21 @@ export const test = baseTest.extend<Fixtures>({
       contacts: contactsData,
       users: usersData,
       profiles: profilesData,
+    });
+  },
+
+  /**
+   * API schemas fixture
+   * - Available as `{ apiSchemas }` in all tests
+   */
+  apiSchemas: async ({}, use) => {
+    await use({
+      userSchema: userSchema,
+      usersListSchema: usersListSchema,
+      profileSchema: profileSchema,
+      contactSchema: contactSchema,
+      contactsListSchema: contactsListSchema,
+      healthSchema: healthSchema,
     });
   },
 });

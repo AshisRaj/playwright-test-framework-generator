@@ -313,6 +313,12 @@ export async function scaffold(a: Answers) {
           '@types/nodemailer': '^7.0.4',
         }
       : (undefined as any)),
+    ...(a.preset === 'api' || a.preset === 'soap' || a.preset === 'hybrid'
+      ? {
+          ajv: '^8.12.0',
+          'ajv-formats': '^2.1.1',
+        }
+      : (undefined as any)),
     ...(a.preset === 'soap' || a.preset === 'hybrid'
       ? {
           'fast-xml-parser': '^5.3.3',

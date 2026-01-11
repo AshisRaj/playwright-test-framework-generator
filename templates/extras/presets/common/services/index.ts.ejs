@@ -1,7 +1,11 @@
 <% if (["api", "hybrid"].includes(preset)) { %>
 export * from './api/ApiClient';
+export * from './api/ApiResponseValidator';
+export * from './api/ApiSchemaRegistry';
 <% } %>
 <% if (["soap", "hybrid"].includes(preset)) { %>
 export * from './soap/SoapClient';
 export * from './soap/SoapParser';
+export * from './soap/SoapResponseValidator';
+export * from './soap/SoapSchemaRegistry';
 <% } %>

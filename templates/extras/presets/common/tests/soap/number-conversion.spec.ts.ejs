@@ -1,4 +1,5 @@
 import { expect, test } from '@fixtures';
+import { validateSoapResponse } from '@services';
 
 test.use({
   soapServiceOptions: {
@@ -10,7 +11,7 @@ test.use({
 test(
   'SOAP NumberConversion NumberToWords returns a non-empty string',
   { tag: ['@smoke', '@regression'] },
-  async ({ soapService, soapData }) => {
+  async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: string };
 
     await test.step('Call NumberToWords operation', async () => {
@@ -19,8 +20,12 @@ test(
 
     await test.step('Verify NumberToWords response', async () => {
       expect(result.status).toBe(200);
-      expect(typeof result.parsed).toBe('string');
-      expect((result.parsed as string).length).toBeGreaterThan(0);
+      const parsed = result.parsed as string;
+      expect(parsed.length).toBeGreaterThan(0);
+    });
+
+    await test.step('Validate NumberToWords schema', async () => {
+      await validateSoapResponse(soapSchemas.numberToWordsSchema, result.parsed);
     });
   },
 );
@@ -28,7 +33,7 @@ test(
 test(
   'SOAP NumberConversion NumberToDollars returns a non-empty string',
   { tag: ['@smoke', '@regression'] },
-  async ({ soapService, soapData }) => {
+  async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: string };
 
     await test.step('Call NumberToDollars operation', async () => {
@@ -37,8 +42,12 @@ test(
 
     await test.step('Verify NumberToDollars response', async () => {
       expect(result.status).toBe(200);
-      expect(typeof result.parsed).toBe('string');
-      expect((result.parsed as string).length).toBeGreaterThan(0);
+      const parsed = result.parsed as string;
+      expect(parsed.length).toBeGreaterThan(0);
+    });
+
+    await test.step('Validate NumberToDollars schema', async () => {
+      await validateSoapResponse(soapSchemas.numberToDollarsSchema, result.parsed);
     });
   },
 );

@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { expect, test } from '@fixtures';
 import { APIResponse } from '@playwright/test';
+import { validateApiResponse } from '@services';
 
 test.use({
   apiServiceOptions: {
@@ -11,17 +14,22 @@ test.use({
 test(
   'Health check should return OK',
   { tag: ['@smoke', '@regression'] },
-  async ({ apiService }) => {
+  async ({ apiService, apiSchemas }) => {
     let response: APIResponse;
 
     await test.step('Call /health endpoint', async () => {
       response = await apiService.get('/health');
     });
 
+    let body: any;
     await test.step('Verify health response', async () => {
       expect(response.status()).toBe(200);
-      const body = await response.json();
+      body = await response.json();
       expect(body.status).toBe('OK');
+    });
+
+    await test.step('Validate health response schema', async () => {
+      await validateApiResponse(apiSchemas.healthSchema, body);
     });
   },
 );

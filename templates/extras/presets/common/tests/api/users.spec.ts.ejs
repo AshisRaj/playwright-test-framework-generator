@@ -1,26 +1,38 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@fixtures';
 import { APIResponse } from '@playwright/test';
+import { validateApiResponse } from '@services';
 
 let userId: number;
 
-test('Create user', { tag: ['@smoke', '@regression'] }, async ({ apiService, apiData }) => {
+test(
+  'Create user',
+  { tag: ['@smoke', '@regression'] },
+  async ({ apiService, apiData, apiSchemas }) => {
+    let response: APIResponse;
+    let body: any;
+
+    await test.step('Send create user request', async () => {
+      response = await apiService.post('/users', apiData.users.newUser);
+    });
+
+    await test.step('Verify create user response', async () => {
+      expect(response.status()).toBe(201);
+      body = await response.json();
+
+      userId = body.id;
+      expect(body.data.name).toBe('Ashis Raj');
+    });
+
+    await test.step('Validate create user response schema', async () => {
+      await validateApiResponse(apiSchemas.userSchema, body);
+    });
+  },
+);
+
+test('Get all users', { tag: ['@smoke', '@regression'] }, async ({ apiService, apiSchemas }) => {
   let response: APIResponse;
-
-  await test.step('Send create user request', async () => {
-    response = await apiService.post('/users', apiData.users.newUser);
-  });
-
-  await test.step('Verify create user response', async () => {
-    expect(response.status()).toBe(201);
-    const body = await response.json();
-
-    userId = body.id;
-    expect(body.data.name).toBe('Ashis Raj');
-  });
-});
-
-test('Get all users', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
-  let response: APIResponse;
+  let users: any;
 
   await test.step('Fetch all users', async () => {
     response = await apiService.get('/users');
@@ -29,13 +41,18 @@ test('Get all users', { tag: ['@smoke', '@regression'] }, async ({ apiService })
   await test.step('Verify users list', async () => {
     expect(response.status()).toBe(200);
 
-    const users = await response.json();
+    users = await response.json();
     expect(users.length).toBeGreaterThan(0);
+  });
+
+  await test.step('Validate users list schema', async () => {
+    await validateApiResponse(apiSchemas.usersListSchema, users);
   });
 });
 
-test('Get user by ID', { tag: ['@smoke', '@regression'] }, async ({ apiService }) => {
+test('Get user by ID', { tag: ['@smoke', '@regression'] }, async ({ apiService, apiSchemas }) => {
   let response: APIResponse;
+  let body: any;
 
   await test.step('Fetch user by ID', async () => {
     response = await apiService.get(`/users/${userId}`);
@@ -43,6 +60,11 @@ test('Get user by ID', { tag: ['@smoke', '@regression'] }, async ({ apiService }
 
   await test.step('Verify user fetch response', async () => {
     expect(response.status()).toBe(200);
+    body = await response.json();
+  });
+
+  await test.step('Validate get user response schema', async () => {
+    await validateApiResponse(apiSchemas.userSchema, body);
   });
 });
 

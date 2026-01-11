@@ -1,0 +1,10 @@
+export const calculatorSchema = {
+  type: 'number',
+  properties: {
+    AddResult: { type: 'number' },
+    SubtractResult: { type: 'number' },
+    MultiplyResult: { type: 'number' },
+    DivideResult: { type: 'number' },
+  },
+  additionalProperties: true,
+} as const;

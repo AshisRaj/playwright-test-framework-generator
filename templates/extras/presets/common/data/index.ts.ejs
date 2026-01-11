@@ -2,6 +2,12 @@
 export * from './soap/Calculator';
 export * from './soap/CountryInfo';
 export * from './soap/NumberConversion';
+export * from './soap/schemas/calculator';
+export * from './soap/schemas/capitalCity';
+export * from './soap/schemas/countryName';
+export * from './soap/schemas/numberToDollars';
+export * from './soap/schemas/numberToWords';
+
 <% } %>
 <% if (preset === 'web' || preset === 'hybrid') { %>
 export * from './ui/Checkout';
@@ -11,5 +17,11 @@ export * from './ui/Checkout';
 export * from './api/contacts';
 export * from './api/profiles';
 export * from './api/users';
+export * from './api/schemas/contact';
+export * from './api/schemas/contacts-list';
+export * from './api/schemas/health';
+export * from './api/schemas/profile';
+export * from './api/schemas/user';
+export * from './api/schemas/users-list';
 <% } %>
 

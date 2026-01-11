@@ -1,5 +1,5 @@
 import type { SoapClient, SoapOptions } from '@services';
-import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData } from '@data';
+import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData, calculatorSchema, capitalCitySchema, countryNameSchema, numberToWordsSchema, numberToDollarsSchema } from '@data';
 
 export type Fixtures = {
   soapService: SoapClient;
@@ -10,5 +10,13 @@ export type Fixtures = {
     calculator: typeof calculatorSoapData;
     countryInfo: typeof countryInfoSoapData;
     numberConversion: typeof numberConversionSoapData;
+  };
+  // SOAP schemas
+  soapSchemas: {
+    calculatorSchema: typeof calculatorSchema;
+    capitalCitySchema: typeof capitalCitySchema;
+    countryNameSchema: typeof countryNameSchema;
+    numberToWordsSchema: typeof numberToWordsSchema;
+    numberToDollarsSchema: typeof numberToDollarsSchema;
   };
 };

@@ -3,6 +3,12 @@ import {
   contactsData,
   profilesData,
   usersData,
+  userSchema,
+  usersListSchema,
+  profileSchema,
+  contactSchema,
+  contactsListSchema,
+  healthSchema,
 } from '@data';
 
 export type Fixtures = {
@@ -14,5 +20,14 @@ export type Fixtures = {
     contacts: typeof contactsData;
     users: typeof usersData;
     profiles: typeof profilesData;
+  };
+  // API schemas
+  apiSchemas: {
+    userSchema: typeof userSchema;
+    usersListSchema: typeof usersListSchema;
+    profileSchema: typeof profileSchema;
+    contactSchema: typeof contactSchema;
+    contactsListSchema: typeof contactsListSchema;
+    healthSchema: typeof healthSchema;
   };
 };

@@ -159,3 +159,53 @@ Commands to run tests locally (recommended):
 npm run build
 npx vitest --run
 ```
+
+## Developer workflows
+
+A few recommended commands and workflows for developing the generator and iterating on templates.
+
+- **Build the CLI:** `npm run build` (outputs `dist/`). Run before invoking `node ./bin/cli.js`.
+- **Dev mode:** `npm run dev` for a TypeScript watcher; run the local CLI in another shell after compilation completes.
+- **Run the CLI locally:** `node ./bin/cli.js init my-tests --preset hybrid --reporter allure --ci github` or use `npx playwright-test-framework-generator init ...`.
+- **Run tests:** `npx vitest` or `npm test`. Prefer `npm run build` first for integration tests that exercise the built `dist/` output.
+
+## Linters & Typechecking
+
+The generator and generated projects include linting and typechecking configuration.
+
+- **Lint the generator:** `npm run lint` (uses `eslint.config.js`).
+- **Typecheck:** `npm run typecheck` or `npx tsc --noEmit` to validate TypeScript across the repo.
+- **Generated projects:** run `npm --prefix ./path/to/generated run lint` and `npm --prefix ./path/to/generated run typecheck` inside scaffolded projects.
+
+Keep lint and typecheck steps fast in pre-commit hooks by using `lint-staged` in generated projects where appropriate.
+
+## Husky & pre-commit hooks
+
+Husky templates are included under `templates/husky/` and a `husky/` folder in the repo — generated projects copy these hooks into the new project.
+
+- To enable hooks locally after cloning this repo or any generated project, run `npx husky install` (or `npm run prepare` if present).
+- Typical pre-commit tasks: `npm run lint`, optional `npm run typecheck`, and lightweight tests. Keep them fast; prefer staged-only checks.
+
+## Adding presets & templates
+
+To add or change presets and templates:
+
+- Add new files under `templates/` or `templates/extras/presets/<your-preset>/` for new preset packs (see `web`, `api`, `hybrid`, `soap`).
+- Update `src/prompts.ts` if you introduce new template variables — this updates the `Answers` shape used by templates.
+- Update `src/scaffold.ts` to include rendering/copying of your new preset directory using the existing `renderAndCopyDir` helpers in `src/files.ts`.
+- Use EJS placeholders (`*.ejs`) for dynamic values; rendering is handled by `src/render.ts`.
+
+## Debugging tips
+
+- Inspect the temporary `dest` directory the scaffold writes to — run the CLI against a disposable folder to preview output.
+- For template rendering issues, render a single template via a small Node script that imports `src/render.ts`.
+- Add `console.log` or throw errors in `src/scaffold.ts` or `src/files.ts` to make failures visible while scaffolding (steps are wrapped with `ora` spinners).
+
+## Useful grep targets
+
+- `src/scaffold.ts` — orchestration and presets wiring
+- `src/prompts.ts` — prompt definitions and `Answers` shape
+- `templates/base/package.json.ejs` — base scripts and dependencies for generated projects
+- `templates/playwright/` — default Playwright layout used by scaffolds
+- `eslint.config.js` — linter rules used by the generator and referenced in templates
+- `husky/` and `templates/husky/` — hook templates used by generated projects
