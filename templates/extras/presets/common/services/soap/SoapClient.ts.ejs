@@ -1,6 +1,8 @@
 import { APIRequestContext, request, type TestInfo } from '@playwright/test';
 import { parseSoapResponse } from '@services';
+<% if (reporter !== 'monocart') { %>
 import { allure } from 'allure-playwright';
+<% } %>
 
 export interface SoapOptions {
   url?: string;
@@ -39,6 +41,7 @@ export class SoapClient {
     const headers = options?.headers ?? this.options.headers;
     const data = options?.body ?? this.options.body;
 
+    <% if (reporter !== 'monocart') { %>
     const reqPayload = {
       method: 'POST',
       url,
@@ -50,6 +53,7 @@ export class SoapClient {
       JSON.stringify(reqPayload, null, 2),
       'application/json',
     );
+    <% } %>
 
     const response = await this.request.post(url, {
       headers: headers,
@@ -57,6 +61,7 @@ export class SoapClient {
     });
     const responseText = await response.text();
 
+    <% if (reporter !== 'monocart') { %>
     const respPayload = {
       status: response.status(),
       statusText: response.statusText(),
@@ -68,6 +73,7 @@ export class SoapClient {
       JSON.stringify(respPayload, null, 2),
       'application/json',
     );
+    <% } %>
 
     return {
       status: response.status(),

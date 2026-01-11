@@ -2,9 +2,10 @@
 import { logger, PROJECT_ROOT, <% if (reporter === "monocart") { %>MONOCART_REPORT_DIR <% } else if (reporter === "allure") { %>REPORTS_DIR <% } else { %>HTML_REPORTS_DIR <% } %>} from '@utils';
 import { execSync } from 'child_process';
 import { Command } from 'commander';
+<% if (reporter !== 'html') { %>
 import fs from 'fs';
-import path, { join } from 'path';
-
+<% } %>
+import <% if (reporter !== 'html') { %>path,<% } %> { join } from 'path';
 const NPX = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 <%
 let defaultReporter = 'allure';

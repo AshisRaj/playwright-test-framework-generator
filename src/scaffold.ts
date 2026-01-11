@@ -282,7 +282,7 @@ export async function scaffold(a: Answers) {
       ? { express: '^5.2.1', '@types/express': '^5.0.6' }
       : (undefined as any)),
     // Add the command-line if user chose Allure
-    ...(a.reporter === 'allure'
+    ...(a.reporter !== 'monocart'
       ? {
           'allure-playwright': '^3.2.1',
           'allure-commandline': '^2.34.1',

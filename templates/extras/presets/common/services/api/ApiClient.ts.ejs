@@ -1,6 +1,6 @@
 import { APIRequestContext, APIResponse, request as baseRequest, TestInfo } from '@playwright/test';
 import { logger } from '@utils';
-<% if (reporter === 'allure') { %>
+<% if (reporter !== 'monocart') { %>
 import { allure } from 'allure-playwright';
 <% } %>
 
@@ -67,7 +67,7 @@ export class ApiClient {
     headers?: Record<string, string>,
   ): Promise<APIResponse> {
 
-    <% if (reporter === 'allure') { %>
+    <% if (reporter !== 'monocart') { %>
     const reqPayload = {
       method,
       url,
@@ -88,7 +88,7 @@ export class ApiClient {
       headers,
     });
 
-    <% if (reporter === 'allure') { %>
+    <% if (reporter !== 'monocart') { %>
       const respPayload = {
       status: response.status(),
       statusText: response.statusText(),
