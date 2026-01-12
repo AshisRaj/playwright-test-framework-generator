@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { defineConfig, devices, ReporterDescription } from '@playwright/test';
-import { ENVIRONMENTS_DIR, MetadataBuilder, PROJECT_ROOT , REPORTS_DIR } from '@utils';
+import { ENVIRONMENTS_DIR, MetadataBuilder, PROJECT_ROOT<% if (reporter === "html") { %>, REPORTS_DIR<% } %> } from '@utils';
 import dotenv from 'dotenv';
 <% if (reporter === "monocart") { %>
 import fs from 'fs';
@@ -94,6 +94,7 @@ const reporter: ReporterDescription[] =
       clean: true,
       trend: path.join(PROJECT_ROOT, "artifacts", "reports", "monocart-report", "index.json"),
       // async hook after report data generated
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onEnd: async (reportData: any, helper: any) => {
         const monocartReportSummary: MonocartSummary = {
           name: reportData.name,

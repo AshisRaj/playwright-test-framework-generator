@@ -12,18 +12,24 @@ const TPL = (p: string) => path.join(dirname, '..', 'templates', p);
 export async function scaffold(a: Answers) {
   const dest = path.resolve(process.cwd(), a.projectName);
 
-  const spin = ora({
-    spinner: 'dots',
-    color: 'cyan',
-    text: `Scaffolding project: ${a.projectName}...`,
-  });
+  // const spin = ora({
+  //   spinner: 'dots',
+  //   color: 'yellow',
+  //   text: `Scaffolding project: ${a.projectName}...`,
+  // });
+  const spinner = ora('Loading unicorns').start();
+
+  setTimeout(() => {
+    spinner.color = 'yellow';
+    spinner.text = `Scaffolding project: ${a.projectName}...`;
+  }, 5000);
   const step = async (label: string, fn: () => Promise<void>) => {
-    spin.start(`\n${label}`);
+    spinner.start(`\n${label}`);
     try {
       await fn();
-      spin.succeed(label);
+      spinner.succeed(label);
     } catch (err) {
-      spin.fail(label);
+      spinner.fail(label);
       throw err;
     }
   };
@@ -259,6 +265,9 @@ export async function scaffold(a: Answers) {
   };
   const devDeps: Record<string, string> = {
     // core tooling
+    '@eslint/json': '^0.12.0',
+    '@eslint/markdown': '^6.4.0',
+    'eslint-plugin-jsonc': '^2.20.0',
     'adm-zip': '^0.5.16',
     '@types/adm-zip': '^0.5.7',
     eslint: '^9.36.0',

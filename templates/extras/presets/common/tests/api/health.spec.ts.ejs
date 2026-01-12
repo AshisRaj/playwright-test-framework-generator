@@ -6,6 +6,7 @@ import { validateApiResponse } from '@services';
 
 test.use({
   apiServiceOptions: {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     apiHeaders: { Authorization: 'Bearer token' },
     log: true,
   },

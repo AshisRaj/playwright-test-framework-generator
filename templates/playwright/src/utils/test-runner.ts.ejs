@@ -101,10 +101,14 @@ const reporter = String(opts.reporter || DEFAULT_REPORTER).toLowerCase();
     run(
       `${NPX} allure generate --single-file ${resultsDir} -o ${path.join(REPORTS_DIR, 'allure-report')} --clean`,
       {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         ALLURE_NO_ANALYTICS: '1',
       },
     );
-    run(`${NPX} allure open ${path.join(REPORTS_DIR, 'allure-report')}`, { ALLURE_NO_ANALYTICS: '1' });
+    run(`${NPX} allure open ${path.join(REPORTS_DIR, 'allure-report')}`, {
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      ALLURE_NO_ANALYTICS: '1',
+    });
   } else {
     logger.warn('No Allure results found!');
   }

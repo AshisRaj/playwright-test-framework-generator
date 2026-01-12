@@ -194,8 +194,10 @@ export async function sendNotifications(args: any, summary: any) {
     env: summary?.env ?? process.env.ENV ?? '',
     branch: summary?.branch ?? process.env.BRANCH ?? '',
     hostname: summary?.hostname ?? summary?.host ?? '',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     os_name: summary?.os_name ?? summary?.os_name ?? summary?.platform ?? '',
     user: summary?.user ?? summary?.user_id ?? '',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     node_version: summary?.node_version ?? process.version,
     date: summary?.date ?? new Date().toISOString(),
   };
@@ -347,7 +349,9 @@ export async function sendNotifications(args: any, summary: any) {
   if (process.env.NOTIFY_TEAMS === 'true' || args.teams.toLowerCase() === 'true') {
     try {
       await axios.post(process.env.TEAMS_WEBHOOK_URL!, {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '@type': 'MessageCard',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         '@context': 'http://schema.org/extensions',
         themeColor: '0076D7',
         summary: 'Playwright Test Summary',

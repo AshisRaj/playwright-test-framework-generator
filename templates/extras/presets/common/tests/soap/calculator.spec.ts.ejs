@@ -3,7 +3,7 @@ import { validateSoapResponse } from '@services';
 import { logger } from '@utils';
 
 test(
-  'SOAP Calculator Add',
+  'sOAP Calculator Add',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
@@ -24,7 +24,7 @@ test(
 );
 
 test(
-  'SOAP Calculator Subtract',
+  'sOAP Calculator Subtract',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
@@ -48,7 +48,7 @@ test(
 );
 
 test(
-  'SOAP Calculator Multiply',
+  'sOAP Calculator Multiply',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
@@ -72,7 +72,7 @@ test(
 );
 
 test(
-  'SOAP Calculator Divide',
+  'sOAP Calculator Divide',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
@@ -82,9 +82,6 @@ test(
     });
 
     await test.step('Log and verify divide result', async () => {
-      logger.info('Raw SOAP Response:', result.rawBody);
-      logger.info('Parsed Result:', result.parsed);
-
       expect(result.status).toBe(200);
       expect(result.parsed).toBe(5);
     });
