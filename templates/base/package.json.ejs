@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     <% if (preset === 'api' || preset === 'hybrid') { %>
-    "start": "ts-node ./src/utils/server.ts",
+    "start": "ts-node ./src/servers/server.ts",
     <% } %>
     "run": "tsx src/utils/test-runner.ts",
     "run:ui": "tsx src/utils/test-runner.ts --ui",

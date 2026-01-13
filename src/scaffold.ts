@@ -12,11 +12,6 @@ const TPL = (p: string) => path.join(dirname, '..', 'templates', p);
 export async function scaffold(a: Answers) {
   const dest = path.resolve(process.cwd(), a.projectName);
 
-  // const spin = ora({
-  //   spinner: 'dots',
-  //   color: 'yellow',
-  //   text: `Scaffolding project: ${a.projectName}...`,
-  // });
   const spinner = ora(`Scaffolding project: ${a.projectName}...`).start();
 
   setTimeout(() => {
@@ -46,156 +41,135 @@ export async function scaffold(a: Answers) {
     },
   );
 
-  // 2) Playwright structure
+  // 2) Playwright structure - src/, tests/
   await step(
-    'Add Playwright structure (src => config, environments, helpers, reporters, utils), playwright.config.ts)',
+    'Add Playwright structure (src => configs, environments, helpers, reporters, utils), playwright.config.ts)',
     async () => {
-      await renderAndCopyDir(TPL('playwright'), dest, a);
+      ['configs', 'environments', 'helpers', 'reporters', 'utils'].forEach(async (folder) => {
+        await renderAndCopyDir(
+          TPL(`playwright/src/common/${folder}`),
+          path.join(dest, 'src', folder),
+          a,
+        );
+      });
     },
   );
 
+  await step('Add Playwright config (playwright.config.ts)', async () => {
+    await renderAndCopyDir(TPL('playwright/playwright.config.ts.ejs'), dest, a);
+  });
+
   if (a.preset === 'web') {
     await step('Add Web as preset (UI/POM + fixtures)', async () => {
+      await renderAndCopyDir(TPL('playwright/src/pages'), path.join(dest, 'src', 'pages'), a);
       await renderAndCopyDir(
-        TPL('extras/presets/common/pages'),
-        path.join(dest, 'src', 'pages'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('extras/presets/web/fixtures'),
+        TPL('playwright/src/fixtures/web'),
         path.join(dest, 'src', 'fixtures'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/data/ui'),
+        TPL('playwright/src/data/ui'),
         path.join(dest, 'src', 'data', 'ui'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/data/index.ts.ejs'),
+        TPL('playwright/src/data/index.ts.ejs'),
         path.join(dest, 'src', 'data'),
         a,
       );
-      await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
+      await renderAndCopyDir(TPL('playwright/tests/ui'), path.join(dest, 'tests/ui'), a);
     });
   }
   if (a.preset === 'api') {
     await step('Add API as preset (API Server, services, tests and fixtures)', async () => {
       await renderAndCopyDir(
-        TPL('extras/presets/api/fixtures'),
+        TPL('playwright/src/fixtures/api'),
         path.join(dest, 'src', 'fixtures'),
         a,
       );
+      await renderAndCopyDir(TPL('playwright/src/server'), path.join(dest, 'src', 'servers'), a);
       await renderAndCopyDir(
-        TPL('extras/presets/common/server'),
-        path.join(dest, 'src', 'utils'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('extras/presets/common/services/api/'),
+        TPL('playwright/src/services/api/'),
         path.join(dest, 'src', 'services', 'api'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/services/index.ts.ejs'),
+        TPL('playwright/src/services/index.ts.ejs'),
         path.join(dest, 'src', 'services'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/data/api/'),
+        TPL('playwright/src/data/api/'),
         path.join(dest, 'src', 'data', 'api'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/data/index.ts.ejs'),
+        TPL('playwright/src/data/index.ts.ejs'),
         path.join(dest, 'src', 'data'),
         a,
       );
-      await renderAndCopyDir(
-        TPL('extras/presets/common/tests/api'),
-        path.join(dest, 'tests/api'),
-        a,
-      );
+      await renderAndCopyDir(TPL('playwright/tests/api'), path.join(dest, 'tests/api'), a);
     });
   }
   if (a.preset === 'soap') {
     await step('Add SOAP preset (WSDL client, services, tests and fixtures)', async () => {
       await renderAndCopyDir(
-        TPL('extras/presets/soap/fixtures'),
+        TPL('playwright/src/fixtures/soap'),
         path.join(dest, 'src', 'fixtures'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/services/soap/'),
+        TPL('playwright/src/services/soap/'),
         path.join(dest, 'src', 'services', 'soap'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/services/index.ts.ejs'),
+        TPL('playwright/src/services/index.ts.ejs'),
         path.join(dest, 'src', 'services'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/data/soap'),
+        TPL('playwright/src/data/soap'),
         path.join(dest, 'src', 'data', 'soap'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/data/index.ts.ejs'),
+        TPL('playwright/src/data/index.ts.ejs'),
         path.join(dest, 'src', 'data'),
         a,
       );
-      await renderAndCopyDir(
-        TPL('extras/presets/common/tests/soap'),
-        path.join(dest, 'tests/soap'),
-        a,
-      );
+      await renderAndCopyDir(TPL('playwright/tests/soap'), path.join(dest, 'tests/soap'), a);
     });
   }
   if (a.preset === 'hybrid') {
     await step('Add UI + API + SOAP as preset (API Server + tests + fixtures)', async () => {
       // Add UI part
+      await renderAndCopyDir(TPL('playwright/src/pages'), path.join(dest, 'src', 'pages'), a);
       await renderAndCopyDir(
-        TPL('extras/presets/common/pages'),
-        path.join(dest, 'src', 'pages'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('extras/presets/hybrid/fixtures'),
+        TPL('playwright/src/fixtures/hybrid'),
         path.join(dest, 'src', 'fixtures'),
         a,
       );
-      await renderAndCopyDir(TPL('extras/presets/common/tests/ui'), path.join(dest, 'tests/ui'), a);
+      await renderAndCopyDir(TPL('playwright/tests/ui'), path.join(dest, 'tests/ui'), a);
+      await renderAndCopyDir(TPL('playwright/tests/api'), path.join(dest, 'tests/api'), a);
+      await renderAndCopyDir(TPL('playwright/tests/soap'), path.join(dest, 'tests/soap'), a);
 
       // Also include API + SOAP artifacts for hybrid (API + SOAP)
+      await renderAndCopyDir(TPL('playwright/src/server'), path.join(dest, 'src', 'servers'), a);
       await renderAndCopyDir(
-        TPL('extras/presets/common/server'),
-        path.join(dest, 'src', 'utils'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('extras/presets/common/services/'),
+        TPL('playwright/src/services/'),
         path.join(dest, 'src', 'services'),
         a,
       );
       await renderAndCopyDir(
-        TPL('extras/presets/common/services/index.ts.ejs'),
+        TPL('playwright/src/services/index.ts.ejs'),
         path.join(dest, 'src', 'services'),
         a,
       );
+
+      await renderAndCopyDir(TPL('playwright/src/data'), path.join(dest, 'src', 'data'), a);
       await renderAndCopyDir(
-        TPL('extras/presets/common/tests/api'),
-        path.join(dest, 'tests/api'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('extras/presets/common/tests/soap'),
-        path.join(dest, 'tests/soap'),
-        a,
-      );
-      await renderAndCopyDir(TPL('extras/presets/common/data'), path.join(dest, 'src', 'data'), a);
-      await renderAndCopyDir(
-        TPL('extras/presets/common/data/index.ts.ejs'),
+        TPL('playwright/src/data/index.ts.ejs'),
         path.join(dest, 'src', 'data'),
         a,
       );

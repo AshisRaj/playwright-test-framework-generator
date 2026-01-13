@@ -1,0 +1,206 @@
+import { APIRequestContext, APIResponse, request as baseRequest, TestInfo } from '@playwright/test';
+import { logger } from '@utils';
+<% if (reporter !== 'monocart') { %>
+import { allure } from 'allure-playwright';
+<% } %>
+
+type ClientCertificate = {
+  origin: string;
+  certPath?: string;
+  keyPath?: string;
+  pfxPath?: string;
+  passphrase?: string;
+};
+
+export type ApiOptions = {
+  apiBaseURL?: string;
+  apiEndPoint?: string;
+  extraHTTPHeaders?: Record<string, string>;
+  headers?: Record<string, string>;
+  clientCertificates?: ClientCertificate[];
+  log?: boolean;
+  retryCount?: number; // Number of retries for failed requests
+  retryDelayMs?: number; // Delay between retries in ms
+  polling?: boolean; // Enable polling
+  pollingIntervalMs?: number; // Polling interval in ms
+  pollingTimeoutMs?: number; // Max time to poll in ms
+};
+
+export class ApiClient {
+  private requestContext;
+  private apiOptions: ApiOptions;
+  private testInfo: TestInfo;
+  private log: boolean;
+
+  constructor(apiOptions: ApiOptions, testInfo: TestInfo) {
+    // newContext returns a Promise<APIRequestContext> so keep the promise here
+    this.requestContext = baseRequest.newContext({
+      baseURL: apiOptions.apiEndPoint
+        ? `${apiOptions.apiBaseURL}/${apiOptions.apiEndPoint}/`
+        : apiOptions.apiBaseURL,
+      extraHTTPHeaders: apiOptions.extraHTTPHeaders,
+      clientCertificates: apiOptions.clientCertificates,
+      ignoreHTTPSErrors: false,
+    }) as Promise<APIRequestContext>;
+    this.apiOptions = apiOptions;
+    this.testInfo = testInfo;
+    this.log = apiOptions.log || false;
+  }
+
+  async get(url: string, apiOptions?: ApiOptions) {
+    return this.execute('GET', url, undefined, apiOptions);
+  }
+
+  async post(url: string, body?: unknown, apiOptions?: ApiOptions) {
+    return this.execute('POST', url, body, apiOptions);
+  }
+
+  async put(url: string, body?: unknown, apiOptions?: ApiOptions) {
+    return this.execute('PUT', url, body, apiOptions);
+  }
+
+  async patch(url: string, body?: unknown, apiOptions?: ApiOptions) {
+    return this.execute('PATCH', url, body, apiOptions);
+  }
+
+  async delete(url: string, apiOptions?: ApiOptions) {
+    return this.execute('DELETE', url, undefined, apiOptions);
+  }
+
+  private async execute(
+    method: string,
+    url: string,
+    body?: unknown,
+    apiOptions?: ApiOptions,
+  ): Promise<APIResponse> {
+    // Merge options: instance defaults overridden by per-request options
+    const retryCount = apiOptions?.retryCount ?? this.apiOptions.retryCount ?? 0;
+    const retryDelayMs = apiOptions?.retryDelayMs ?? this.apiOptions.retryDelayMs ?? 500;
+    const polling = apiOptions?.polling ?? this.apiOptions.polling ?? false;
+    const pollingIntervalMs =
+      apiOptions?.pollingIntervalMs ?? this.apiOptions.pollingIntervalMs ?? 500;
+    const pollingTimeoutMs =
+      apiOptions?.pollingTimeoutMs ?? this.apiOptions.pollingTimeoutMs ?? 10000;
+    const headers = apiOptions?.headers ?? {};
+    const reqContext = await this.requestContext;
+    let attempts = 0;
+    let lastError: unknown = null;
+
+    // Helper for delay
+    const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+    // Retry logic
+    logger.info(
+      `API Request: ${method} ${url} | Retry: ${retryCount} | Polling: ${polling} | Timeout: ${pollingTimeoutMs}ms | Interval: ${pollingIntervalMs}ms`,
+    );
+
+    <% if (reporter !== 'monocart') { %>
+      // Helper for request logging
+    const logRequest = async () => {
+      const reqPayload = {
+        method,
+        url,
+        headers,
+        body,
+        retrySettings: {
+          retryCount: retryCount,
+          retryDelayMs: retryDelayMs,
+          polling: polling,
+          pollingIntervalMs: pollingIntervalMs,
+          pollingTimeoutMs: pollingTimeoutMs,
+        },
+      };
+      await allure.attachment(
+        `REQUEST: ${method} ${url}`,
+        JSON.stringify(reqPayload, null, 2),
+        'application/json',
+      );
+    };
+
+    // Helper for response logging
+    const logResponse = async (response: APIResponse) => {
+      const respPayload = {
+        status: response.status(),
+        statusText: response.statusText(),
+        headers: response.headers(),
+        body: await response.text(),
+      };
+      await allure.attachment(
+        `RESPONSE: ${method} ${url}`,
+        JSON.stringify(respPayload, null, 2),
+        'application/json',
+      );
+    };
+    if (this.log === true) {
+      await logRequest();
+    }
+    <% } %>
+
+    while (attempts <= retryCount) {
+      try {
+        if (polling) {
+          // Polling logic
+          const start = Date.now();
+          while (Date.now() - start < pollingTimeoutMs) {
+            const response = await reqContext.fetch(url, {
+              method,
+              data: body,
+              headers,
+            });
+
+            if (this.log === true) {
+              await logResponse(response);
+            }
+
+            if (response.ok()) {
+              return response;
+            }
+            await delay(pollingIntervalMs);
+          }
+          throw new Error(`Polling timed out after ${pollingTimeoutMs}ms`);
+        } else {
+          // Standard request with retry
+          const response = await reqContext.fetch(url, {
+            method,
+            data: body,
+            headers,
+          });
+
+          if (this.log === true) {
+            await logResponse(response);
+          }
+
+          if (response.ok()) {
+            return response;
+          } else {
+            lastError = new Error(`HTTP error: ${response.status()}`);
+          }
+        }
+      } catch (err) {
+        lastError = err;
+      }
+      attempts++;
+      if (attempts <= retryCount) {
+        await delay(retryDelayMs);
+      }
+    }
+    throw lastError || new Error('API request failed');
+  }
+
+  async dispose() {
+    const reqContext = await this.requestContext;
+    await reqContext
+      .dispose()
+      .then(() => {
+        if (this.log === true) {
+          logger.info(`API request context disposed for test: ${this.testInfo.title}`);
+        }
+      })
+      .catch((error) => {
+        logger.error(
+          `Failed to dispose API request context for test: ${this.testInfo.title}`,
+          error,
+        );
+      });
+  }
+}

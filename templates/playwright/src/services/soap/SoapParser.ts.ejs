@@ -1,4 +1,3 @@
-import { logger } from '@utils';
 import { XMLParser } from 'fast-xml-parser';
 
 const parser = new XMLParser({
@@ -9,8 +8,6 @@ const parser = new XMLParser({
 
 export function parseSoapResponse<T>(xml: string, path: string): T {
   const json = parser.parse(xml);
-  logger.info('Parsed SOAP Response JSON:', JSON.stringify(json, null, 2));
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return path.split('.').reduce((obj: any, key) => obj[key], json);
 }
