@@ -54,9 +54,15 @@ export const test = baseTest.extend<Fixtures>({
     const options: ApiOptions = {
       apiBaseURL: baseURL,
       apiEndPoint: apiServiceOptions?.apiEndPoint || '',
-      apiHeaders: apiServiceOptions?.apiHeaders,
+      extraHTTPHeaders: apiServiceOptions?.extraHTTPHeaders,
+      headers: apiServiceOptions?.headers,
       clientCertificates: apiServiceOptions?.clientCertificates,
       log: apiServiceOptions?.log,
+      retryCount: apiServiceOptions?.retryCount,
+      retryDelayMs: apiServiceOptions?.retryDelayMs,
+      polling: apiServiceOptions?.polling,
+      pollingIntervalMs: apiServiceOptions?.pollingIntervalMs,
+      pollingTimeoutMs: apiServiceOptions?.pollingTimeoutMs,
     };
     const client = new ApiClient(options, testInfo);
     await use(client);

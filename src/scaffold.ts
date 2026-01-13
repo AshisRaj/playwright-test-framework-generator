@@ -17,12 +17,12 @@ export async function scaffold(a: Answers) {
   //   color: 'yellow',
   //   text: `Scaffolding project: ${a.projectName}...`,
   // });
-  const spinner = ora('Loading unicorns').start();
+  const spinner = ora(`Scaffolding project: ${a.projectName}...`).start();
 
   setTimeout(() => {
     spinner.color = 'yellow';
-    spinner.text = `Scaffolding project: ${a.projectName}...`;
-  }, 5000);
+  }, 1000);
+
   const step = async (label: string, fn: () => Promise<void>) => {
     spinner.start(`\n${label}`);
     try {

@@ -4,6 +4,11 @@ const app = express();
 
 app.use(json());
 
+app.use((req, res, next) => {
+  console.log('Incoming:', req.method, req.url);
+  next();
+});
+
 interface User {
   id: number;
   name: string;
@@ -32,6 +37,38 @@ let profiles: Profile[] = [];
 /* -------------------- Health Check -------------------- */
 app.get('/health', (req: express.Request, res: express.Response): void => {
   res.json({ status: 'OK', message: 'API is running' });
+});
+
+// --- Mocked health endpoints for advanced client testing ---
+let healthFailCount = 0;
+let healthFlapCount = 0;
+
+// Fails first N times, then healthy (for retry test)
+app.get('/mock-health-retry', (req: express.Request, res: express.Response) => {
+  if (healthFailCount < 2) {
+    healthFailCount++;
+    res.status(503).json({ status: 'FAIL', message: 'Service Unavailable' });
+  } else {
+    healthFailCount = 0; // Reset for future calls
+    res.json({ status: 'OK', message: 'Recovered' });
+  }
+});
+
+// Flaps between fail and ok (for polling test)
+app.get('/mock-health-poll', (req: express.Request, res: express.Response) => {
+  healthFlapCount++;
+  if (healthFlapCount % 3 === 0) {
+    healthFlapCount = 0; // Reset for future calls
+    res.json({ status: 'OK', message: 'Eventually Healthy' });
+  } else {
+    res.status(503).json({ status: 'FAIL', message: 'Still Unhealthy' });
+  }
+});
+
+// Always slow (for delay/timeout test)
+app.get('/mock-health-delay', async (req: express.Request, res: express.Response) => {
+  await new Promise((r) => setTimeout(r, 1200));
+  res.json({ status: 'OK', message: 'Slow but Healthy' });
 });
 
 /* ======================================================
