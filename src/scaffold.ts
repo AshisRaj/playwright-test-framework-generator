@@ -68,6 +68,11 @@ export async function scaffold(a: Answers) {
         a,
       );
       await renderAndCopyDir(
+        TPL('playwright/src/fixtures/index.ts.ejs'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(
         TPL('playwright/src/data/ui'),
         path.join(dest, 'src', 'data', 'ui'),
         a,
@@ -87,7 +92,16 @@ export async function scaffold(a: Answers) {
         path.join(dest, 'src', 'fixtures'),
         a,
       );
-      await renderAndCopyDir(TPL('playwright/src/server'), path.join(dest, 'src', 'servers'), a);
+      await renderAndCopyDir(
+        TPL('playwright/src/fixtures/index.ts.ejs'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('playwright/src/common/servers'),
+        path.join(dest, 'src', 'servers'),
+        a,
+      );
       await renderAndCopyDir(
         TPL('playwright/src/services/api/'),
         path.join(dest, 'src', 'services', 'api'),
@@ -115,6 +129,11 @@ export async function scaffold(a: Answers) {
     await step('Add SOAP preset (WSDL client, services, tests and fixtures)', async () => {
       await renderAndCopyDir(
         TPL('playwright/src/fixtures/soap'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
+      await renderAndCopyDir(
+        TPL('playwright/src/fixtures/index.ts.ejs'),
         path.join(dest, 'src', 'fixtures'),
         a,
       );
@@ -155,7 +174,11 @@ export async function scaffold(a: Answers) {
       await renderAndCopyDir(TPL('playwright/tests/soap'), path.join(dest, 'tests/soap'), a);
 
       // Also include API + SOAP artifacts for hybrid (API + SOAP)
-      await renderAndCopyDir(TPL('playwright/src/server'), path.join(dest, 'src', 'servers'), a);
+      await renderAndCopyDir(
+        TPL('playwright/src/common/servers'),
+        path.join(dest, 'src', 'servers'),
+        a,
+      );
       await renderAndCopyDir(
         TPL('playwright/src/services/'),
         path.join(dest, 'src', 'services'),
