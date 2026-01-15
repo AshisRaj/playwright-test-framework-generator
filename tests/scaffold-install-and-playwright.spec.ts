@@ -43,7 +43,7 @@ describe('Scaffolded projects: install, check, and playwright', () => {
     // Run Playwright tests with HTML reporter
     res = await runCLI(scaffoldTestDir, 'npm', ['run', 'test']);
     expect(res.exitCode).toBe(0);
-    expect(res.out).toMatch(/Running \d+ tests using \d+ worker/i);
+    expect(res.out).toMatch(/Test run started with \d+ tests/i);
 
     // Ensure the HTML report was generated
     const reportPath = join(scaffoldTestDir, 'artifacts', 'reports', 'html-reports', 'index.html');
