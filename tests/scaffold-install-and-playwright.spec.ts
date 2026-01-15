@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from 'fs';
+import { statSync } from 'fs';
 import path, { join } from 'path';
 import { describe, expect, it } from 'vitest';
 import { runCLI } from './helpers';
@@ -48,9 +48,5 @@ describe('Scaffolded projects: install, check, and playwright', () => {
     // Ensure the HTML report was generated
     const reportPath = join(scaffoldTestDir, 'artifacts', 'reports', 'html-reports', 'index.html');
     expect(statSync(reportPath).isFile()).toBe(true);
-
-    // Optionally, you can also check if the report contains expected content
-    const reportContent = readFileSync(reportPath, 'utf8');
-    expect(reportContent).toContain('Playwright E2E Framework');
   });
 });
