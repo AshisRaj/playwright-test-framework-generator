@@ -1,4 +1,5 @@
-import path from 'path';
+import { readFileSync, statSync } from 'fs';
+import path, { join } from 'path';
 import { describe, expect, it } from 'vitest';
 import { runCLI } from './helpers';
 
@@ -13,7 +14,17 @@ describe('Scaffolded projects: install, check, and playwright', () => {
     console.log('Created test dir:', testProjectName, res);
 
     // Scaffold the project
-    const args = ['init', testProjectName, '--pm', 'npm', '-y'];
+    const args = [
+      'init',
+      testProjectName,
+      '--pm',
+      'npm',
+      '--preset',
+      'soap',
+      '--reporter',
+      'html',
+      '-y',
+    ];
     const { exitCode } = await runCLI(process.cwd(), 'node', [distEntry, ...args]);
     expect(exitCode).toBe(0);
 
@@ -26,19 +37,20 @@ describe('Scaffolded projects: install, check, and playwright', () => {
     // Check if the project has a 'check' script
     res = await runCLI(scaffoldTestDir, 'npm', ['run', 'check']);
     expect(res.exitCode).toBe(0);
-    expect(res.out).toMatch(/All files are valid/);
+    expect(res.out).toMatch(/tsc --noEmit/);
+    expect(res.out).toMatch(/eslint . --fix --max-warnings 0 --no-cache/);
 
     // Run Playwright tests with HTML reporter
-    // res = await runCLI(scaffoldTestDir, 'npx', ['playwright', 'test', '--reporter', 'html']);
-    // expect(res.exitCode).toBe(0);
-    // expect(res.out).toMatch(/Running \d+ tests using \d+ worker/i);
+    res = await runCLI(scaffoldTestDir, 'npm', ['run', 'test']);
+    expect(res.exitCode).toBe(0);
+    expect(res.out).toMatch(/Running \d+ tests using \d+ worker/i);
 
-    // // Ensure the HTML report was generated
-    // const reportPath = join(scaffoldTestDir, 'playwright-report', 'index.html');
-    // expect(statSync(reportPath).isFile()).toBe(true);
+    // Ensure the HTML report was generated
+    const reportPath = join(scaffoldTestDir, 'artifacts', 'reports', 'html-reports', 'index.html');
+    expect(statSync(reportPath).isFile()).toBe(true);
 
-    // // Optionally, you can also check if the report contains expected content
-    // const reportContent = readFileSync(reportPath, 'utf8');
-    // expect(reportContent).toContain('Playwright Test Report');
+    // Optionally, you can also check if the report contains expected content
+    const reportContent = readFileSync(reportPath, 'utf8');
+    expect(reportContent).toContain('Playwright E2E Framework');
   });
 });
