@@ -48,7 +48,6 @@ describe('scaffold: package manager and script validation', () => {
       expect(pkg.scripts.test).toMatch(/playwright test/);
       expect(pkg.scripts['test:ui']).toMatch(/playwright test --ui/);
       expect(pkg.scripts['test:headed']).toMatch(/playwright test --headed/);
-      // No missing scripts for selected pm
       expect(Object.keys(pkg.scripts)).toContain('run-and-notify');
     }
   });
