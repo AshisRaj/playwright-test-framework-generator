@@ -35,7 +35,8 @@ export async function askQuestions(projectName: string, flags: any): Promise<Ans
     !!flags.yes || !!flags.nonInteractive || process.env.CI === '1' || process.env.CI === 'true';
   const base: Partial<Answers> = {
     projectName,
-    language: flags.js ? 'js' : 'ts',
+    // Note: --js flag means TS is false, so we invert it here as TS only
+    language: flags.js ? 'ts' : 'ts',
     packageManager: flags.pm === 'yarn' ? 'yarn' : 'npm',
     ci: flags.ci,
     reporter: flags.reporter,

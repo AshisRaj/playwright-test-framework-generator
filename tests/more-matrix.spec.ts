@@ -3,6 +3,8 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { exists, makeTmpDir, readJSON, runCLI } from './helpers';
 
+const distEntry = path.resolve(process.cwd(), 'dist/index.js'); // your built CLI
+
 function toArgs(name: string, c: any): string[] {
   const args = [
     'init',
@@ -146,7 +148,7 @@ describe('init (additional matrix)', () => {
     it(`scaffolds and wires deps: ${c.id}`, async () => {
       const tmp = makeTmpDir();
       const name = `proj-${c.id}`;
-      const { out, exitCode } = await runCLI(tmp, toArgs(name, c));
+      const { out, exitCode } = await runCLI(tmp, 'node', [distEntry, ...toArgs(name, c)]);
 
       expect(exitCode).toBe(0);
       expect(out).toMatch(/Create project folder/i);

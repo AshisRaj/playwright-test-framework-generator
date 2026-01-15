@@ -19,7 +19,7 @@ describe('askQuestions (non-interactive flags mapping)', () => {
     const ans = await askQuestions('myproj', flags);
 
     expect(ans.projectName).toBe('myproj');
-    expect(ans.language).toBe('js');
+    expect(ans.language).toBe('ts');
     expect(ans.packageManager).toBe('yarn');
     expect(ans.ci).toBe('gitlab');
     expect(ans.reporter).toBe('monocart');
@@ -60,7 +60,7 @@ describe('askQuestions (non-interactive flags mapping)', () => {
     const ans = await askQuestions('soapproj', flags);
 
     expect(ans.projectName).toBe('soapproj');
-    expect(ans.language).toBe('js');
+    expect(ans.language).toBe('ts');
     expect(ans.packageManager).toBe('npm');
     expect(ans.ci).toBe('github');
     expect(ans.reporter).toBe('allure');

@@ -7,15 +7,17 @@ import stripAnsi from 'strip-ansi';
 
 export const makeTmpDir = (prefix = 'playwright-test-framework-generator-') => {
   const dir = mkdtempSync(path.join(tmpdir(), prefix));
-  console.log(`dir name - ${dir}`);
   return dir;
 };
 
-export const runCLI = async (cwd: string, args: string[], env: Record<string, string> = {}) => {
-  const bin = 'node';
-  const distEntry = path.resolve(process.cwd(), 'dist/index.js'); // your built CLI
-  const cmdArgs = [distEntry, ...args];
-  const proc = await execa(bin, cmdArgs, {
+export const runCLI = async (
+  cwd: string,
+  command: string,
+  args: string[],
+  env: Record<string, string> = {},
+) => {
+  console.log(`Running command: ${command} ${args.join(' ')} in ${cwd}`);
+  const proc = await execa(command, args, {
     cwd,
     env: { ...process.env, CI: '1', ...env },
     all: true,

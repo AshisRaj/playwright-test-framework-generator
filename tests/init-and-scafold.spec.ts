@@ -1,7 +1,58 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import path from 'node:path';
+import path from 'path';
 import { describe, expect, it } from 'vitest';
 import { exists, makeTmpDir, read, readJSON, runCLI } from './helpers';
+
+const distEntry = path.resolve(process.cwd(), 'dist/index.js'); // your built CLI
+
+describe('scaffold: package manager and script validation', () => {
+  it('fails with clear error for unsupported package manager', async () => {
+    const tmp = makeTmpDir();
+    const name = 'proj-unsupported-pm';
+    const args = ['init', name, '--pm', 'pnpm', '-y'];
+    const { out, exitCode } = await runCLI(tmp, 'node', [distEntry, ...args]);
+    expect(exitCode).not.toBe(0);
+    expect(out).toMatch(/Invalid option\(s\):\s+--pm must be one of: npm, yarn/i);
+  });
+
+  it('fails with clear error for missing script', async () => {
+    const tmp = makeTmpDir();
+    const name = 'proj-yarn-missing-script';
+    const args = ['init', name, '--pm', 'yarn', '--notifications', 'false', '-y'];
+    const { exitCode } = await runCLI(tmp, 'node', [distEntry, ...args]);
+    expect(exitCode).toBe(0);
+    const root = path.join(tmp, name);
+    const pkg = readJSON(path.join(root, 'package.json'));
+    expect(pkg.scripts['run-and-notify']).toBeUndefined();
+    expect(pkg.scripts['notify-report']).toBeUndefined();
+    // Simulate running the missing script
+    let result = await runCLI(root, 'npm', ['install']);
+    expect(result.exitCode).toBe(0);
+    // add regexp to ignore number of packages added
+    expect(result.out).toMatch(/added \d+ packages, and audited \d+ packages in/i);
+    result = await runCLI(root, 'yarn', ['run-and-notify']);
+    expect(result.exitCode).not.toBe(0);
+    expect(result.out).toMatch(/error Command "run-and-notify" not found./i);
+  });
+
+  it('generates correct scripts for each package manager', async () => {
+    for (const pm of ['npm', 'yarn']) {
+      const tmp = makeTmpDir();
+      const name = `proj-${pm}-scripts`;
+      const args = ['init', name, '--pm', pm, '-y'];
+      const { exitCode } = await runCLI(tmp, 'node', [distEntry, ...args]);
+      expect(exitCode).toBe(0);
+      const root = path.join(tmp, name);
+      const pkg = readJSON(path.join(root, 'package.json'));
+      // Core scripts must exist
+      expect(pkg.scripts.test).toMatch(/playwright test/);
+      expect(pkg.scripts['test:ui']).toMatch(/playwright test --ui/);
+      expect(pkg.scripts['test:headed']).toMatch(/playwright test --headed/);
+      // No missing scripts for selected pm
+      expect(Object.keys(pkg.scripts)).toContain('run-and-notify');
+    }
+  });
+});
 
 // helper to build args from a case
 function toArgs(name: string, c: any): string[] {
@@ -143,7 +194,7 @@ describe('init (matrix)', () => {
     it(`scaffolds: ${c.id}`, async () => {
       const tmp = makeTmpDir();
       const name = `proj-${c.id}`;
-      const { out, exitCode } = await runCLI(tmp, toArgs(name, c));
+      const { out, exitCode } = await runCLI(tmp, 'node', [distEntry, ...toArgs(name, c)]);
 
       expect(exitCode).toBe(0);
       expect(out).toMatch(/Create project folder/i);

@@ -13,7 +13,6 @@ async function main() {
   logger.info(`Found ${files.length} test result files in ${resultsPath}`);
 
   // TODO: transform Allure JSON to Zephyr payload and POST via axios
-  console.log("Posting to Zephyr... (stub)");
 }
 
 main().catch((e) => { logger.error(e); process.exit(1); });

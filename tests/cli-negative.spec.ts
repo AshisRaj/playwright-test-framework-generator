@@ -2,10 +2,12 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { exists, makeTmpDir, runCLI } from './helpers';
 
+const distEntry = path.resolve(process.cwd(), 'dist/index.js'); // your built CLI
+
 describe('CLI negative cases', () => {
   it('fails when project-name is missing', async () => {
     const tmp = makeTmpDir();
-    const { out, exitCode } = await runCLI(tmp, ['init']); // no project-name
+    const { out, exitCode } = await runCLI(tmp, 'node', [distEntry, 'init']); // no project-name
 
     // Commander exits with non-zero on argument error; our helper doesn't throw
     expect(exitCode).toBe(1);
@@ -20,7 +22,12 @@ describe('CLI negative cases', () => {
 
   it('fails on unknown option', async () => {
     const tmp = makeTmpDir();
-    const { out, exitCode } = await runCLI(tmp, ['init', 'proj-unknown', '--not-a-real-flag']);
+    const { out, exitCode } = await runCLI(tmp, 'node', [
+      distEntry,
+      'init',
+      'proj-unknown',
+      '--not-a-real-flag',
+    ]);
 
     expect(exitCode).toBe(1);
     expect(out).toMatch(/error:\s*unknown option/i);
