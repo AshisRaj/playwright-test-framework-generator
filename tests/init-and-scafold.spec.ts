@@ -175,21 +175,23 @@ describe('init (matrix)', async () => {
     },
     // html + npm + gitlab
     {
-      id: 'ts-npm-html-gl-nohusky-preset-soap',
+      id: 'ts-npm-html-gl-nohusky-preset-soap-zephyr',
       lang: 'ts',
       pm: 'npm',
       reporter: 'html',
       ci: 'gitlab',
       husky: false,
       preset: 'soap',
+      zephyr: true,
     },
     {
-      id: 'ts-yarn-monocart-none-hybrid',
+      id: 'ts-yarn-monocart-noci-hybrid-nozephyr',
       lang: 'ts',
       pm: 'yarn',
       ci: 'none',
       reporter: 'monocart',
       preset: 'hybrid',
+      zephyr: false,
     },
   ] as const;
 
