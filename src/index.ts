@@ -3,13 +3,16 @@ import { bold, cyan } from 'kolorist';
 import { askQuestions } from './prompts.js';
 import { scaffold } from './scaffold.js';
 
+// Create a new Command instance
 const program = new Command();
 
+// Define the CLI
 program
   .name('playwright-test-framework-generator')
   .description('Scaffold a Playwright test framework baseline')
   .version('1.0.0');
 
+// Define the 'init' command
 program
   .command('init')
   .argument('<project-name>', 'folder to create')
@@ -54,4 +57,5 @@ program
     console.log(`\n${bold('✔ Done!')} cd ${cyan(projectName)} && npm i && npm test`);
   });
 
+// Parse the command-line arguments
 program.parse(process.argv);

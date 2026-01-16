@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import inquirer from 'inquirer';
 
+// Define the shape of answers
 export type Answers = {
   projectName: string;
   language: 'ts' | 'js';
@@ -13,6 +14,7 @@ export type Answers = {
   preset: 'web' | 'api' | 'soap' | 'hybrid';
 };
 
+// Define question types
 type ListQ<K extends keyof Answers> = {
   type: 'list';
   name: K;
@@ -21,6 +23,7 @@ type ListQ<K extends keyof Answers> = {
   default?: Answers[K];
 };
 
+// Define question types
 type ConfirmQ<K extends keyof Answers> = {
   type: 'confirm';
   name: K;
@@ -28,8 +31,15 @@ type ConfirmQ<K extends keyof Answers> = {
   default?: boolean;
 };
 
+// Union of question types
 type Q = ListQ<keyof Answers> | ConfirmQ<keyof Answers>;
 
+/**
+ * Prompt user for configuration options
+ * @param projectName
+ * @param flags
+ * @returns --- IGNORE ---
+ */
 export async function askQuestions(projectName: string, flags: any): Promise<Answers> {
   const nonInteractive =
     !!flags.yes || !!flags.nonInteractive || process.env.CI === '1' || process.env.CI === 'true';
@@ -61,6 +71,7 @@ export async function askQuestions(projectName: string, flags: any): Promise<Ans
     };
   }
 
+  // Interactive mode: prompt user
   const questions = [
     {
       type: 'list',
@@ -131,5 +142,6 @@ export async function askQuestions(projectName: string, flags: any): Promise<Ans
   // One pragmatic cast to avoid the union-overload fight in v12:
   const answers = await (inquirer as any).prompt(questions);
 
+  // Merge base and answers
   return { ...(base as Answers), ...(answers as Answers) };
 }

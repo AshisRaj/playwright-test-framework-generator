@@ -3,10 +3,21 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { render } from './render.js';
 
+/**
+ * Ensure directory exists
+ * @param p The path to the directory
+ * @returns --- IGNORE ---
+ */
 export async function ensureDir(p: string) {
   await fs.mkdir(p, { recursive: true });
 }
 
+/**
+ * Copy directory recursively
+ * @param src The source directory path
+ * @param dst The destination directory path
+ * @returns --- IGNORE ---
+ */
 export async function copyDir(src: string, dst: string) {
   // If source doesn't exist, create destination dir and return silently.
   try {
@@ -26,6 +37,13 @@ export async function copyDir(src: string, dst: string) {
   }
 }
 
+/**
+ * Render templates and copy directory recursively
+ * @param src The source directory path
+ * @param dst The destination directory path
+ * @param data The data to use for rendering templates
+ * @returns --- IGNORE ---
+ */
 export async function renderAndCopyDir(src: string, dst: string, data: any) {
   // If source doesn't exist, ensure destination directory exists and return.
   try {
@@ -62,6 +80,12 @@ export async function renderAndCopyDir(src: string, dst: string, data: any) {
   }
 }
 
+/**
+ * Write object as JSON to file
+ * @param p The path to the file
+ * @param obj The object to write as JSON
+ * @returns --- IGNORE ---
+ */
 export async function writeJSON(p: string, obj: any) {
   await fs.writeFile(p, JSON.stringify(obj, null, 2) + '\n', 'utf8');
 }

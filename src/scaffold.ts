@@ -6,9 +6,16 @@ import ora from 'ora';
 import { copyDir, ensureDir, renderAndCopyDir, writeJSON } from './files.js';
 import type { Answers } from './prompts.js';
 
+// Determine __dirname in ES module scope
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Template path helper
 const TPL = (p: string) => path.join(dirname, '..', 'templates', p);
 
+/**
+ * Scaffold a new project based on answers
+ * @param a The answers object containing user selections
+ */
 export async function scaffold(a: Answers) {
   const dest = path.resolve(process.cwd(), a.projectName);
 
@@ -18,6 +25,7 @@ export async function scaffold(a: Answers) {
     spinner.color = 'yellow';
   }, 1000);
 
+  // Step helper
   const step = async (label: string, fn: () => Promise<void>) => {
     spinner.start(`\n${label}`);
     try {
@@ -29,11 +37,12 @@ export async function scaffold(a: Answers) {
     }
   };
 
+  // Create project directory
   await step(`Create project folder: ${a.projectName}`, async () => {
     await fs.mkdir(dest, { recursive: true });
   });
 
-  // 1) Base files
+  // Base files and folders
   await step(
     'Scaffold base files and folders (.vscode/, .editorconfig, .gitignore, .prettierignore, .prettierrc, eslint.config.js, package.json, README.md, tsconfig.json)',
     async () => {
@@ -41,7 +50,7 @@ export async function scaffold(a: Answers) {
     },
   );
 
-  // 2) Playwright structure - src/, tests/
+  // Playwright-specific structure
   await step(
     'Add Playwright structure (src => configs, environments, helpers, reporters, utils), playwright.config.ts)',
     async () => {
@@ -55,10 +64,12 @@ export async function scaffold(a: Answers) {
     },
   );
 
+  // Preset-specific structure
   await step('Add Playwright config (playwright.config.ts)', async () => {
     await renderAndCopyDir(TPL('playwright/playwright.config.ts.ejs'), dest, a);
   });
 
+  // Presets: web / api / soap / hybrid
   if (a.preset === 'web') {
     await step('Add Web as preset (UI/POM + fixtures)', async () => {
       await renderAndCopyDir(TPL('playwright/src/pages'), path.join(dest, 'src', 'pages'), a);
@@ -203,7 +214,7 @@ export async function scaffold(a: Answers) {
     });
   }
 
-  // 3) Reporters:  Allure / Monocart / html
+  // Extras: reporters, notifications, CI, husky, zephyr
   if (a.reporter === 'allure') {
     await step('Include Allure docs (docs/reporters/allure)', async () => {
       await copyDir(TPL('docs/reporters/allure'), path.join(dest, 'docs/reporters/allure'));
@@ -250,91 +261,90 @@ export async function scaffold(a: Answers) {
     });
   }
 
-  // 4) package.json dependency wiring
+  // Finalize package.json with dependencies and scripts
   const pkgPath = path.join(dest, 'package.json');
   const pkg = JSON.parse((await fs.readFile(pkgPath)).toString());
+  let deps: Record<string, string>;
+  let devDeps: Record<string, string>;
+  // Dependencies and devDependencies
+  await step('Prepare package.json dependencies and scripts', async () => {
+    deps = {
+      '@playwright/test': '^1.51.1',
+      axios: '^1.9.0',
+      dotenv: '^16.5.0',
+      yarn: a.packageManager === 'yarn' ? '^1.22.22' : (undefined as any),
+    };
+    devDeps = {
+      // core tooling
+      '@eslint/json': '^0.12.0',
+      '@eslint/markdown': '^6.4.0',
+      'eslint-plugin-jsonc': '^2.20.0',
+      'adm-zip': '^0.5.16',
+      '@types/adm-zip': '^0.5.7',
+      eslint: '^9.36.0',
+      '@eslint/js': '^9.36.0',
+      globals: '^15.12.0',
+      'eslint-config-prettier': '^9.1.0',
+      'eslint-plugin-playwright': '^2.0.0',
+      prettier: '^3.3.3',
+      husky: '^9.1.7',
+      'lint-staged': '^15.5.1',
+      '@faker-js/faker': '^9.7.0',
+      chance: '^1.1.12',
+      moment: '^2.30.1',
+      'cross-env': '^7.0.3',
+      lodash: '^4.17.21',
+      rimraf: '^6.0.1',
+      winston: '^3.17.0',
+      'winston-daily-rotate-file': '^5.0.0',
+      kolorist: '^1.8.0',
+      ...(a.preset === 'api' || a.preset === 'hybrid'
+        ? { express: '^5.2.1', '@types/express': '^5.0.6' }
+        : (undefined as any)),
+      // Add the command-line if user chose Allure
+      ...(a.reporter !== 'monocart'
+        ? {
+            'allure-playwright': '^3.2.1',
+            'allure-commandline': '^2.34.1',
+          }
+        : (undefined as any)),
+      // Add Monocart only when chosen
+      ...(a.reporter === 'monocart'
+        ? {
+            'monocart-reporter': '^2.9.18',
+          }
+        : (undefined as any)),
 
-  const deps: Record<string, string> = {
-    '@playwright/test': '^1.51.1',
-    axios: '^1.9.0',
-    dotenv: '^16.5.0',
-    yarn: a.packageManager === 'yarn' ? '^1.22.22' : (undefined as any),
-  };
-  const devDeps: Record<string, string> = {
-    // core tooling
-    '@eslint/json': '^0.12.0',
-    '@eslint/markdown': '^6.4.0',
-    'eslint-plugin-jsonc': '^2.20.0',
-    'adm-zip': '^0.5.16',
-    '@types/adm-zip': '^0.5.7',
-    eslint: '^9.36.0',
-    '@eslint/js': '^9.36.0',
-    globals: '^15.12.0',
-    'eslint-config-prettier': '^9.1.0',
-    'eslint-plugin-playwright': '^2.0.0',
-    prettier: '^3.3.3',
-    husky: '^9.1.7',
-    'lint-staged': '^15.5.1',
-    '@faker-js/faker': '^9.7.0',
-    chance: '^1.1.12',
-    moment: '^2.30.1',
-    'cross-env': '^7.0.3',
-    lodash: '^4.17.21',
-    rimraf: '^6.0.1',
-    winston: '^3.17.0',
-    'winston-daily-rotate-file': '^5.0.0',
-    kolorist: '^1.8.0',
-    ...(a.preset === 'api' || a.preset === 'hybrid'
-      ? { express: '^5.2.1', '@types/express': '^5.0.6' }
-      : (undefined as any)),
-    // Add the command-line if user chose Allure
-    ...(a.reporter !== 'monocart'
-      ? {
-          'allure-playwright': '^3.2.1',
-          'allure-commandline': '^2.34.1',
-        }
-      : (undefined as any)),
-    // Add Monocart only when chosen
-    ...(a.reporter === 'monocart'
-      ? {
-          'monocart-reporter': '^2.9.18',
-        }
-      : (undefined as any)),
-
-    // TypeScript toolchain (only when TS is chosen)
-    ...(a.language === 'ts' || a.language === 'js'
-      ? {
-          typescript: '^5.8.3',
-          'ts-node': '^10.9.2',
-          tsx: '^4.20.6',
-          '@types/node': '^20.14.15',
-          '@types/argparse': '^2.0.17',
-          'typescript-eslint': '^8.8.1',
-        }
-      : (undefined as any)),
-    ...(a.notifications
-      ? {
-          nodemailer: '^7.0.11',
-          '@slack/webhook': '^7.0.6',
-          '@types/nodemailer': '^7.0.4',
-        }
-      : (undefined as any)),
-    ...(a.preset === 'api' || a.preset === 'soap' || a.preset === 'hybrid'
-      ? {
-          ajv: '^8.12.0',
-          'ajv-formats': '^2.1.1',
-        }
-      : (undefined as any)),
-    ...(a.preset === 'soap' || a.preset === 'hybrid'
-      ? {
-          'fast-xml-parser': '^5.3.3',
-        }
-      : (undefined as any)),
-  };
-
-  // 5) Doc structure
-  await step('Include docs', async () => {
-    await copyDir(TPL('docs/best-practices'), path.join(dest, 'docs/best-practices'));
+      // TypeScript toolchain (only when TS is chosen)
+      ...(a.language === 'ts' || a.language === 'js'
+        ? {
+            typescript: '^5.8.3',
+            'ts-node': '^10.9.2',
+            tsx: '^4.20.6',
+            '@types/node': '^20.14.15',
+            '@types/argparse': '^2.0.17',
+            'typescript-eslint': '^8.8.1',
+          }
+        : (undefined as any)),
+      ...(a.notifications
+        ? {
+            nodemailer: '^7.0.11',
+            '@slack/webhook': '^7.0.6',
+            '@types/nodemailer': '^7.0.4',
+          }
+        : (undefined as any)),
+      ...(a.preset === 'api' || a.preset === 'soap' || a.preset === 'hybrid'
+        ? {
+            ajv: '^8.12.0',
+            'ajv-formats': '^2.1.1',
+          }
+        : (undefined as any)),
+      ...(a.preset === 'soap' || a.preset === 'hybrid'
+        ? {
+            'fast-xml-parser': '^5.3.3',
+          }
+        : (undefined as any)),
+    };
   });
 
   await step('Finalize package.json', async () => {
@@ -373,5 +383,10 @@ export async function scaffold(a: Answers) {
       pkg.scripts['report:open'] = `${pmBin} playwright show-report`;
     }
     await writeJSON(pkgPath, pkg);
+  });
+
+  // Extra docs
+  await step('Include docs', async () => {
+    await copyDir(TPL('docs/best-practices'), path.join(dest, 'docs/best-practices'));
   });
 }
