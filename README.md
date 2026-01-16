@@ -110,15 +110,42 @@ Run the generator without installing globally using `npx` or by invoking the loc
 
 Use `node ./bin/cli.js --help` or `npx playwright-test-framework-generator --help` for CLI options.
 
+#### Non-Interactive Mode (Recommended for Automation)
+
+**Purpose & Intention:**
+
+Non-interactive mode allows you to scaffold projects entirely via CLI flags, bypassing interactive prompts. This is ideal for automation, CI/CD pipelines, scripting, and reproducible setups. All required options (such as `--preset`, `--reporter`, `--ci`, etc.) are provided up front, ensuring consistent and hands-free project generation.
+
+**Usage Example:**
+
 ```sh
-# Use npx (preferred)
-npx playwright-test-framework-generator init pw-tests-hybrid --reporter allure --ci github --preset hybrid
+# Scaffold a hybrid preset project with Allure and GitHub CI, non-interactively
+npx playwright-test-framework-generator init pw-tests-hybrid --preset hybrid --reporter allure --ci github
 
-# Or invoke the local built CLI
-node ./bin/cli.js init pw-tests-web
+# Or use the -y flag to skip all prompts and use defaults/non-interactive mode
+npx playwright-test-framework-generator init pw-tests-hybrid -y --preset hybrid --reporter allure --ci github
 
-# Example: scaffold the SOAP preset
+# Scaffold a SOAP preset project non-interactively
 npx playwright-test-framework-generator init my-soap-project --preset soap --ci github
+```
+
+**When to use non-interactive mode:**
+
+- Automating project creation in scripts or CI workflows
+- Ensuring consistent, repeatable scaffolds across teams
+- Avoiding manual input for batch or remote setups
+
+If you omit required flags, the CLI will fall back to interactive prompts to collect missing information.
+
+#### Interactive Mode
+
+If you run the CLI without specifying all required flags, it will prompt you for choices interactively. This is useful for exploring options or customizing a single project manually.
+
+**Usage Example:**
+
+```sh
+# Interactive mode (prompts for missing options)
+npx playwright-test-framework-generator init pw-tests-web
 ```
 
 ### After scaffolding:
