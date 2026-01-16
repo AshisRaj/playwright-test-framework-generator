@@ -153,39 +153,43 @@ describe('init (matrix)', async () => {
   const cases = [
     // minimal TS + npm + allure + playwright + github + husky on
     {
-      id: 'ts-npm-allure-pw-gh-husky',
-      lang: 'ts',
+      id: 'js-npm-allure-gh-husky-web-no-notifications',
+      lang: 'js',
       pm: 'npm',
       reporter: 'allure',
       ci: 'github',
       husky: true,
+      preset: 'web',
+      Notifications: false,
     },
     // monocart + yarn
     {
-      id: 'ts-yarn-monocart-pw-gh-husky',
+      id: 'ts-yarn-monocart-gl-husky-api-notifications',
       lang: 'ts',
       pm: 'yarn',
       reporter: 'monocart',
-      ci: 'github',
+      ci: 'gitlab',
       husky: true,
+      preset: 'api',
+      notifications: true,
     },
     // html + npm + gitlab
     {
-      id: 'js-npm-html-pw-gl-nohusky',
-      lang: 'js',
+      id: 'ts-npm-html-gl-nohusky-preset-soap',
+      lang: 'ts',
       pm: 'npm',
       reporter: 'html',
       ci: 'gitlab',
       husky: false,
+      preset: 'soap',
     },
-    // list + yarn + none runner
     {
-      id: 'ts-yarn-list-none-none-husky',
+      id: 'ts-yarn-monocart-none-hybrid',
       lang: 'ts',
       pm: 'yarn',
       ci: 'none',
       reporter: 'monocart',
-      husky: true,
+      preset: 'hybrid',
     },
   ] as const;
 
@@ -230,8 +234,11 @@ describe('init (matrix)', async () => {
       // Install dependencies and check for errors
       let res = await runCLI(root, c.pm, ['install']);
       expect(res.exitCode).toBe(0);
-      expect(res.out).toMatch(/added \d+ packages, and audited \d+ packages in|up to date/i);
-
+      if (c.pm === 'npm') {
+        expect(res.out).toMatch(/added \d+ packages, and audited \d+ packages in|up to date/i);
+      } else if (c.pm === 'yarn') {
+        expect(res.out).toMatch(/success Saved lockfile.|Already up to date./i);
+      }
       // Run check script to validate no errors
       res = await runCLI(root, c.pm, ['run', 'check']);
       expect(res.exitCode).toBe(0);
