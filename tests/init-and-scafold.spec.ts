@@ -188,6 +188,16 @@ describe('init (matrix)', () => {
       husky: true,
     },
   ] as const;
+  // Install dependencies and check for errors
+  let res = await runCLI(root, c.pm, ['install']);
+  expect(res.exitCode).toBe(0);
+  expect(res.out).toMatch(/added \d+ packages, and audited \d+ packages in|up to date/i);
+
+  // Run check script to validate no errors
+  res = await runCLI(root, c.pm, ['run', 'check']);
+  expect(res.exitCode).toBe(0);
+  expect(res.out).toMatch(/tsc --noEmit/);
+  expect(res.out).toMatch(/eslint . --fix --max-warnings 0 --no-cache/);
 
   for (const c of cases) {
     it(`scaffolds: ${c.id}`, async () => {

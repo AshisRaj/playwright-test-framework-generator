@@ -180,6 +180,11 @@ export async function scaffold(a: Answers) {
         path.join(dest, 'src', 'fixtures'),
         a,
       );
+      await renderAndCopyDir(
+        TPL('playwright/src/fixtures/index.ts.ejs'),
+        path.join(dest, 'src', 'fixtures'),
+        a,
+      );
       await renderAndCopyDir(TPL('playwright/tests/ui'), path.join(dest, 'tests/ui'), a);
       await renderAndCopyDir(TPL('playwright/tests/api'), path.join(dest, 'tests/api'), a);
       await renderAndCopyDir(TPL('playwright/tests/soap'), path.join(dest, 'tests/soap'), a);
