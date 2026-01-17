@@ -1,4 +1,5 @@
 
+# Check that commit message is at least 5 characters long
 msgFile=$1
 msg=$(cat "$msgFile")
 if [ ${#msg} -lt 5 ]; then
