@@ -14,6 +14,12 @@
   - [Use the CLI to scaffold a project](#use-the-cli-to-scaffold-a-project)
   - [After scaffolding](#after-scaffolding)
 - [Testing Strategy](#testing-strategy)
+- [Developer workflows](#developer-workflows)
+- [Linters & Typechecking](#linters--typechecking)
+- [Husky & pre-commit hooks](#husky--pre-commit-hooks)
+- [Adding presets & templates](#adding-presets--templates)
+- [Debugging tips](#debugging-tips)
+- [Useful grep targets](#useful-grep-targets)
 
 ## Overview
 
