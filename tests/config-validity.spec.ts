@@ -13,7 +13,7 @@ describe('template validity', () => {
     const vscode = read(path.join(root, '.vscode', 'settings.json'));
     expect(() => JSON.parse(vscode)).not.toThrow();
 
-    const eslint = read(path.join(root, 'eslint.config.js'));
+    const eslint = read(path.join(root, 'eslint.config.mjs'));
     expect(eslint).toMatch(/export default/);
     expect(eslint).toMatch(/@eslint\/js/);
   });
