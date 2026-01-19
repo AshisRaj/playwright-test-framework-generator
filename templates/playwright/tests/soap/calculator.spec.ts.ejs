@@ -3,7 +3,7 @@ import { validateSoapResponse } from '@services';
 import { logger } from '@utils';
 
 test(
-  'sOAP Calculator Add',
+  'SOAP Calculator Add',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
@@ -24,7 +24,7 @@ test(
 );
 
 test(
-  'sOAP Calculator Subtract',
+  'SOAP Calculator Subtract',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
@@ -48,7 +48,7 @@ test(
 );
 
 test(
-  'sOAP Calculator Multiply',
+  'SOAP Calculator Multiply',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
@@ -72,7 +72,7 @@ test(
 );
 
 test(
-  'sOAP Calculator Divide',
+  'SOAP Calculator Divide',
   { tag: ['@smoke', '@regression'] },
   async ({ soapService, soapData, soapSchemas }) => {
     let result: { status: number; rawBody?: string; parsed?: number };
