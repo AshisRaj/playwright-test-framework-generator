@@ -148,9 +148,11 @@ export class ApiClient {
               headers,
             });
 
+            <% if (reporter !== 'monocart') { %>
             if (this.log === true) {
               await logResponse(response);
             }
+            <% } %>
 
             if (response.ok()) {
               return response;
@@ -166,9 +168,11 @@ export class ApiClient {
             headers,
           });
 
+          <% if (reporter !== 'monocart') { %>
           if (this.log === true) {
             await logResponse(response);
           }
+          <% } %>
 
           if (response.ok()) {
             return response;

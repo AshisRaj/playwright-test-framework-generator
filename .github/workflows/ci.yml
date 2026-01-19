@@ -1,95 +1,95 @@
-# name: CI
+name: CI
 
-# on:
-#   push:
-#     branches: [main]
-#   pull_request:
-#     branches: [main]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-# # Ensure the workflow has permission to create/update pages and push branches
-# permissions:
-#   contents: write
-#   pages: write
+# Ensure the workflow has permission to create/update pages and push branches
+permissions:
+  contents: write
+  pages: write
 
-# jobs:
-#   test:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
-#         with:
-#           persist-credentials: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-#       - name: Use Node.js 20
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: '20'
-#           cache: 'npm'
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-#       - name: Install dependencies
-#         run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-#       - name: Run prettier check
-#         run: |
-#           npm run prettier-fix
-#           git diff --exit-code || (echo "Prettier changed files; run 'npm run prettier-fix' and commit." && exit 1)
+      - name: Run prettier check
+        run: |
+          npm run prettier-fix
+          git diff --exit-code || (echo "Prettier changed files; run 'npm run prettier-fix' and commit." && exit 1)
 
-#       - name: Setup husky
-#         run: |
-#           npm run prepare
-#           git config --get core.hooksPath || echo 'no hooks path set'
-#           git config core.hooksPath .husky && git config --get core.hooksPath
-#           chmod +x .husky/pre-commit .husky/commit-msg && git ls-files --stage .husky/pre-commit .husky/commit-msg || ls -la .husky
+      - name: Setup husky
+        run: |
+          npm run prepare
+          git config --get core.hooksPath || echo 'no hooks path set'
+          git config core.hooksPath .husky && git config --get core.hooksPath
+          chmod +x .husky/pre-commit .husky/commit-msg && git ls-files --stage .husky/pre-commit .husky/commit-msg || ls -la .husky
 
-#       - name: Run typecheck and lint
-#         run: npm run check
+      - name: Run typecheck and lint
+        run: npm run check
 
-#       - name: Build
-#         run: npm run build
+      - name: Build
+        run: npm run build
 
-#       - name: Run tests (HTML)
-#         run: |
-#           # Run vitest and emit an HTML report
-#           npx vitest --run --reporter html || npx vitest --run
+      - name: Run tests (HTML)
+        run: |
+          # Run vitest and emit an HTML report
+          npx vitest --run --reporter html || npx vitest --run
 
-#       - name: Upload test artifacts
-#         uses: actions/upload-artifact@v4
-#         with:
-#           name: test-reports
-#           path: |
-#             html/**
-#           if-no-files-found: warn
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            html/**
+          if-no-files-found: warn
 
-#   publish-pages:
-#     # Only publish on pushes to main (not on PRs)
-#     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-#     runs-on: ubuntu-latest
-#     needs: test
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
-#         with:
-#           persist-credentials: true
+  publish-pages:
+    # Only publish on pushes to main (not on PRs)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-#       - name: Use Node.js 20
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: '20'
-#           cache: 'npm'
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
 
-#       - name: Install dependencies
-#         run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-#       - name: Build
-#         run: npm run build
+      - name: Build
+        run: npm run build
 
-#       - name: Run tests (HTML reporter)
-#         run: |
-#           # Generate HTML report into ./html
-#           npx vitest --run --reporter html || npx vitest --run
+      - name: Run tests (HTML reporter)
+        run: |
+          # Generate HTML report into ./html
+          npx vitest --run --reporter html || npx vitest --run
 
-#       - name: Publish HTML report to GitHub Pages
-#         uses: peaceiris/actions-gh-pages@v3
-#         with:
-#           github_token: ${{ secrets.GITHUB_TOKEN }}
-#           publish_dir: ./html
+      - name: Publish HTML report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./html

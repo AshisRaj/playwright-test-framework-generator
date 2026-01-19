@@ -56,7 +56,7 @@ export default defineConfig([
   // Playwright test files
   playwright.configs['flat/recommended'],
   {
-    files: ['src/**/*.{ts,tsx,js,jsx}', 'tests/**/*.{ts,tsx,js,jsx}', '**/*.{ts,tsx,js,jsx}'],
+    files: ['tests/**/*.spec.ts', 'tests/**/*.test.ts'],
     rules: {
       'playwright/no-focused-test': 'error', // Prevent focused tests
       'playwright/no-skipped-test': 'warn', // Warn about skipped tests
@@ -73,7 +73,7 @@ export default defineConfig([
       'playwright/no-nested-step': 'error',
       'playwright/no-networkidle': 'error',
       'playwright/no-nth-methods': 'error',
-      'playwright/no-raw-locators': ['off', { allowed: ['iframe', "[aria-busy='false']"] }],
+      'playwright/no-raw-locators': ['warn', { allowed: ['iframe', "[aria-busy='false']"] }],
       'playwright/missing-playwright-await': ['error'],
       'playwright/valid-expect': 'error',
       'playwright/valid-title': 'error',
@@ -101,15 +101,23 @@ export default defineConfig([
           format: ['camelCase', 'UPPER_CASE'],
           leadingUnderscore: 'allow',
         },
-        // Allow quoted property names (e.g., 'Content-Type') to be exempt from camelCase
         {
-          selector: 'property',
-          modifiers: ['requiresQuotes'],
+          selector: 'objectLiteralProperty',
           format: null,
+          modifiers: ['requiresQuotes'],
+          filter: {
+            regex: '^[^_]+$',
+            match: true,
+          },
         },
         // Function names (camelCase)
         {
           selector: 'function',
+          format: ['camelCase'],
+        },
+        // Method names (camelCase)
+        {
+          selector: 'method',
           format: ['camelCase'],
         },
         // Class names (PascalCase)
@@ -146,6 +154,11 @@ export default defineConfig([
           selector: 'property',
           format: ['camelCase'],
           leadingUnderscore: 'allow',
+          modifiers: ['requiresQuotes'],
+          filter: {
+            regex: '^[^_]+$',
+            match: true,
+          },
         },
       ],
     },
@@ -162,13 +175,18 @@ export default defineConfig([
       '**/allure-results/**',
       '**/allure-report/**',
       '**/playwright-report/**',
+      '**/specs/**',
       '**/logs/**',
       '**/temp/**',
+      '**services/**',
       '**/tsconfig.json',
       '**/tsconfig.*.json',
       '**/package*.json',
-      '**/executor.json',
+      '**/openapitools.json',
+      '**/executors.json',
       '.vscode/**',
+      '**/utils/test-scenarios.json',
+      '**/configs/executor.json',
       '**/artifacts/**/*cookies.json',
       '**/artifacts/reports/**',
     ],

@@ -57,6 +57,7 @@ export default [
     rules: {
       '@typescript-eslint/naming-convention': [
         'error',
+        // Variable names (camelCase or UPPER_CASE for constants)
         {
           selector: 'variable',
           format: ['camelCase', 'UPPER_CASE'],
@@ -71,34 +72,46 @@ export default [
             match: true,
           },
         },
+        // Function names (camelCase)
         {
           selector: 'function',
           format: ['camelCase'],
         },
+        // Method names (camelCase)
         {
           selector: 'method',
           format: ['camelCase'],
         },
+        // Class names (PascalCase)
         {
           selector: 'class',
           format: ['PascalCase'],
         },
+        // Interface names (PascalCase with "I" prefix)
         {
           selector: 'interface',
           format: ['PascalCase'],
+          // custom: {
+          //   regex: '^I[A-Z]',
+          //   match: true,
+          // },
         },
+        // Type aliases (PascalCase)
         {
           selector: 'typeAlias',
           format: ['PascalCase'],
         },
+        // Enum names (PascalCase)
         {
           selector: 'enum',
           format: ['PascalCase'],
         },
+        // Enum members (UPPER_CASE or PascalCase)
         {
           selector: 'enumMember',
           format: ['UPPER_CASE', 'PascalCase'],
         },
+        // Property names (camelCase)
         {
           selector: 'property',
           format: ['camelCase'],
