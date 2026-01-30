@@ -1,10 +1,10 @@
+import { getApiSchemaValidator } from '@services';
 import { logger } from '@utils';
-import { getApiSchemaValidator } from './ApiSchemaRegistry';
 
 export async function validateApiResponse(
   schemaOrPath: Record<string, unknown> | string,
   data: unknown,
-): Promise<true> {
+) {
   const validate = await getApiSchemaValidator(schemaOrPath as unknown as string | object);
   const valid = validate(data);
   if (!valid) {

@@ -52,7 +52,7 @@ export async function scaffold(a: Answers) {
 
   // Playwright-specific structure
   await step(
-    'Add Playwright structure (src => configs, environments, helpers, reporters, utils), playwright.config.ts)',
+    'Add Playwright structure (src => configs, environments, helpers, reporters, utils)',
     async () => {
       ['configs', 'environments', 'helpers', 'reporters', 'utils'].forEach(async (folder) => {
         await renderAndCopyDir(
@@ -172,7 +172,7 @@ export async function scaffold(a: Answers) {
     });
   }
   if (a.preset === 'hybrid') {
-    await step('Add UI + API + SOAP as preset (API Server + tests + fixtures)', async () => {
+    await step('Add Hybrid (UI + API + SOAP + Fixtures) as preset', async () => {
       // Add UI part
       await renderAndCopyDir(TPL('playwright/src/pages'), path.join(dest, 'src', 'pages'), a);
       await renderAndCopyDir(
