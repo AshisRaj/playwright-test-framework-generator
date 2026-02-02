@@ -92,6 +92,25 @@ export default defineConfig([
   },
   {
     files: ['**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        // Enable type-aware linting for TS rules that need type info
+        project: ['./tsconfig.json'],
+      },
+    },
+    rules: {
+      // Require handling of Promises — prevents forgetting to await async calls
+      '@typescript-eslint/no-floating-promises': [
+        'error',
+        {
+          ignoreVoid: true,
+          ignoreIIFE: true,
+        },
+      ],
+    },
+  },
+  {
+    files: ['**/*.ts'],
     rules: {
       '@typescript-eslint/naming-convention': [
         'error',
@@ -187,8 +206,7 @@ export default defineConfig([
       '.vscode/**',
       '**/utils/test-scenarios.json',
       '**/configs/executor.json',
-      '**/artifacts/**/*cookies.json',
-      '**/artifacts/reports/**',
+      '**/artifacts/*',
     ],
   },
 ]);

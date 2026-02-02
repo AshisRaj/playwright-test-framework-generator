@@ -51,5 +51,3 @@ Purpose: get an AI coding agent productive fast. This file highlights the repo's
 - For rendering issues, import and call `src/render.ts` from a small Node script to reproduce.
 
 **Quick grep targets:** `src/scaffold.ts`, `src/prompts.ts`, `src/render.ts`, `src/files.ts`, `templates/`, `husky/`, `eslint.config.js`.
-
-If you want, I can: update a preset, add a new template, or walk through adding CI/lint steps — tell me which and I'll implement it.
