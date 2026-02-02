@@ -274,7 +274,7 @@ export async function scaffold(a: Answers) {
   // Dependencies and devDependencies
   await step('Prepare package.json dependencies and scripts', async () => {
     deps = {
-      '@playwright/test': '^1.51.1',
+      '@playwright/test': '^1.58.1',
       axios: '^1.9.0',
       dotenv: '^16.5.0',
       yarn: a.packageManager === 'yarn' ? '^1.22.22' : (undefined as any),
