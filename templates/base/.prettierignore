@@ -1,5 +1,5 @@
-allure-results/
-allure-report/
-test-results/
-services/
-specs/
+**/**/allure-results/
+**/**/allure-report/
+**/**/test-results/
+**/**/html-reports/
+**/**/monocart-report/
