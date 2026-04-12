@@ -242,3 +242,15 @@ To add or change presets and templates:
 - `templates/playwright/` — default Playwright layout used by scaffolds
 - `eslint.config.js` — linter rules used by the generator and referenced in templates
 - `husky/` and `templates/husky/` — hook templates used by generated projects
+
+## Annextures
+
+### Test Reports on Slack and Gmail for the generated Framework and Tests run.
+<img width="1028" height="552" alt="image" src="https://github.com/user-attachments/assets/788005cc-8dbc-419f-8bfb-57410d6a81bf" />
+
+<img width="689" height="652" alt="image" src="https://github.com/user-attachments/assets/da39fb16-24f2-4fc4-b4ab-a0261ea3fbc9" />
+
+### Test report for Unit tests of Generator tool
+  <img width="1208" height="652" alt="image" src="https://github.com/user-attachments/assets/6ef0442f-aeb4-4e37-abd1-079574319e8d" />
+
+
