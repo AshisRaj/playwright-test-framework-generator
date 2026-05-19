@@ -150,7 +150,7 @@ export const test = baseTest.extend<Fixtures>({
 
     // SESSION — reuse saved storageState (cookies, localStorage)
     if (AUTH_MODE === 'SESSION') {
-      const storageStatePath = path.resolve(COOKIES_DIR, `${process.env.USERNAME}_cookies.json`);
+      const storageStatePath = path.resolve(COOKIES_DIR, `${process.env.USER_NAME}_cookies.json`);
       const context = await browser.newContext({ storageState: storageStatePath });
       const page = await context.newPage();
       await use(page);
@@ -164,7 +164,7 @@ export const test = baseTest.extend<Fixtures>({
       const page = await context.newPage();
       const loginPage = new LoginPage(page);
       await loginPage.navigation.goToLoginPage();
-      await loginPage.login(process.env.USERNAME!, process.env.USERPASSWORD!);
+      await loginPage.login(process.env.USER_NAME!, process.env.USER_PASSWORD!);
       await use(page);
       await page.close();
       await context.close();
