@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { logger, PROJECT_ROOT, <% if (reporter === "monocart") { %>MONOCART_REPORT_DIR <% } else if (reporter === "allure") { %>REPORTS_DIR <% } else { %>HTML_REPORTS_DIR <% } %>} from '@utils';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import { Command } from 'commander';
 <% if (reporter !== 'html') { %>
 import fs from 'fs';
@@ -98,17 +98,40 @@ const reporter = String(opts.reporter || DEFAULT_REPORTER).toLowerCase();
 <% } else if (reporter === 'allure') { %>
   const resultsDir = path.join(REPORTS_DIR, 'allure-results');
   if (fs.existsSync(resultsDir) && fs.readdirSync(resultsDir).length > 0) {
-    run(
-      `${NPX} allure generate --single-file ${resultsDir} -o ${path.join(REPORTS_DIR, 'allure-report')} --clean`,
-      {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        ALLURE_NO_ANALYTICS: '1',
-      },
-    );
-    run(`${NPX} allure open ${path.join(REPORTS_DIR, 'allure-report')}`, {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      ALLURE_NO_ANALYTICS: '1',
-    });
+    logger.info(`💻 Running: ${NPX} allure generate --single-file ${resultsDir} -o ${path.join(
+      REPORTS_DIR,
+      'allure-report',
+    )} --clean`);
+    try {
+      execFileSync(
+        NPX,
+        [
+          'allure',
+          'generate',
+          '--single-file',
+          resultsDir,
+          '-o',
+          path.join(REPORTS_DIR, 'allure-report'),
+          '--clean',
+        ],
+        {
+          cwd: PROJECT_ROOT,
+          stdio: 'inherit',
+          env: { ...process.env, // eslint-disable-next-line @typescript-eslint/naming-convention
+            ALLURE_NO_ANALYTICS: '1' },
+        },
+      );
+      logger.info(`💻 Running: ${NPX} allure open ${path.join(REPORTS_DIR, 'allure-report')}`);
+      execFileSync(NPX, ['allure', 'open', path.join(REPORTS_DIR, 'allure-report')], {
+        cwd: PROJECT_ROOT,
+        stdio: 'inherit',
+        env: { ...process.env, // eslint-disable-next-line @typescript-eslint/naming-convention
+          ALLURE_NO_ANALYTICS: '1' },
+      });
+    } catch (err: any) {
+      logger.error(`❌ Command failed: ${NPX} allure open ${path.join(REPORTS_DIR, 'allure-report')}`);
+      process.exitCode = typeof err?.status === 'number' ? err.status : 1;
+    }
   } else {
     logger.warn('No Allure results found!');
   }
