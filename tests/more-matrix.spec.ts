@@ -197,30 +197,33 @@ describe('init (additional matrix)', () => {
       if (c.preset === 'web') {
         expect(exists(path.join(root, 'src', 'pages'))).toBe(true);
         expect(exists(path.join(root, 'tests', 'ui'))).toBe(true);
+        expect(exists(path.join(root, 'test-data', 'ui'))).toBe(true);
       }
       if (c.preset === 'api') {
-        expect(exists(path.join(root, 'src', 'services'))).toBe(true);
+        expect(exists(path.join(root, 'src', 'utils', 'api'))).toBe(true);
         expect(exists(path.join(root, 'tests', 'api'))).toBe(true);
+        expect(exists(path.join(root, 'test-data', 'api'))).toBe(true);
       }
       if (c.preset === 'hybrid') {
         // UI artifacts
         expect(exists(path.join(root, 'src', 'pages'))).toBe(true);
         expect(exists(path.join(root, 'tests', 'ui'))).toBe(true);
+        expect(exists(path.join(root, 'test-data', 'ui'))).toBe(true);
 
         // API artifacts
-        expect(exists(path.join(root, 'src', 'services'))).toBe(true);
+        expect(exists(path.join(root, 'src', 'utils', 'api'))).toBe(true);
         expect(exists(path.join(root, 'tests', 'api'))).toBe(true);
-        expect(exists(path.join(root, 'src', 'data', 'api'))).toBe(true);
+        expect(exists(path.join(root, 'test-data', 'api'))).toBe(true);
 
         // SOAP artifacts
-        expect(exists(path.join(root, 'src', 'services', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'src', 'utils', 'soap'))).toBe(true);
         expect(exists(path.join(root, 'tests', 'soap'))).toBe(true);
-        expect(exists(path.join(root, 'src', 'data', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'test-data', 'soap'))).toBe(true);
       }
       if (c.preset === 'soap') {
-        expect(exists(path.join(root, 'src', 'services', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'src', 'utils', 'soap'))).toBe(true);
         expect(exists(path.join(root, 'tests', 'soap'))).toBe(true);
-        expect(exists(path.join(root, 'src', 'data', 'soap'))).toBe(true);
+        expect(exists(path.join(root, 'test-data', 'soap'))).toBe(true);
       }
     }, 120_000);
   }

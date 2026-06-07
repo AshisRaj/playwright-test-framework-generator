@@ -1,31 +1,60 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * `scaffold.ts`
+ *
+ * Responsible for generating a Playwright test project from templates based on
+ * the user's answers. The function drives a sequence of rendering/copying
+ * operations and then mutates `package.json` for the generated project.
+ *
+ * Key responsibilities:
+ * - create the project directory
+ * - render base templates (editor config, package.json, tsconfig, README)
+ * - scaffold Playwright-specific folders (configs, fixtures, pages, tests)
+ * - include optional extras (reporters, CI workflows, notifications, husky)
+ * - finalize `package.json` dependencies, devDependencies and scripts
+ */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ora from 'ora';
-import { copyDir, ensureDir, renderAndCopyDir, writeJSON } from './files.js';
+import { copyDir, renderAndCopyDir, writeJSON } from './files.js';
 import type { Answers } from './prompts.js';
 
-// Determine __dirname in ES module scope
+// Determine __dirname in ESM (fileURLToPath is the portable approach)
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Template path helper
+// Helper to build an absolute path into the `templates/` folder.
+// Usage: TPL('playwright/src/pages') => <repo>/templates/playwright/src/pages
 const TPL = (p: string) => path.join(dirname, '..', 'templates', p);
 
 /**
- * Scaffold a new project based on answers
- * @param a The answers object containing user selections
+ * Scaffold a new project based on the provided `Answers`.
+ *
+ * The function is intentionally imperative and sequential: template rendering
+ * must happen in a predictable order (base files first, then Playwright
+ * structure, presets, extras, and finally package.json updates).
+ *
+ * @param a - The answers object returned from prompts (see `src/prompts.ts`).
  */
 export async function scaffold(a: Answers) {
+  // Destination folder for the generated project (resolved from current cwd)
   const dest = path.resolve(process.cwd(), a.projectName);
 
+  // Spinner gives the CLI friendly progress feedback while scaffolding
   const spinner = ora(`Scaffolding project: ${a.projectName}...`).start();
 
+  // Small visual tweak: move to yellow after start so long-running steps feel active
   setTimeout(() => {
     spinner.color = 'yellow';
   }, 1000);
 
-  // Step helper
+  /**
+   * Simple step runner used throughout this file. Each step displays a label
+   * in the spinner, executes the async work and reports success/failure.
+   *
+   * Keeping this as a local helper reduces duplication and provides
+   * consistent UX for long scaffolding operations.
+   */
   const step = async (label: string, fn: () => Promise<void>) => {
     spinner.start(`\n${label}`);
     try {
@@ -37,12 +66,14 @@ export async function scaffold(a: Answers) {
     }
   };
 
-  // Create project directory
+  // --- Create project directory ---
+  // `recursive: true` is a safe no-op if the folder already exists.
   await step(`Create project folder: ${a.projectName}`, async () => {
     await fs.mkdir(dest, { recursive: true });
   });
 
-  // Base files and folders
+  // --- Base templates ---
+  // These include editor settings, package.json.ejs, README, tsconfig etc.
   await step(
     'Scaffold base files and folders (.vscode/, .editorconfig, .gitignore, .prettierignore, .prettierrc, eslint.config.js, package.json, README.md, tsconfig.json)',
     async () => {
@@ -50,176 +81,128 @@ export async function scaffold(a: Answers) {
     },
   );
 
-  // Playwright-specific structure
-  await step(
-    'Add Playwright structure (src => configs, environments, helpers, reporters, utils)',
-    async () => {
-      ['configs', 'environments', 'helpers', 'reporters', 'utils'].forEach(async (folder) => {
-        await renderAndCopyDir(
-          TPL(`playwright/src/common/${folder}`),
-          path.join(dest, 'src', folder),
-          a,
-        );
-      });
-    },
-  );
+  // --- Playwright common structure ---
+  // Render configs and environments first, then selective utils files.
+  await step('Add Playwright structure (src => configs, environments)', async () => {
+    // Render common folders sequentially to ensure order and proper awaits
+    for (const folder of ['configs', 'environments']) {
+      await renderAndCopyDir(TPL(`playwright/src/${folder}`), path.join(dest, 'src', folder), a);
+    }
 
-  // Preset-specific structure
+    // Utility files to include depend on chosen preset(s). We build an array
+    // with conditional entries and filter `null`s out before rendering.
+    const utilsFiles = [
+      ['web', 'hybrid'].includes(a.preset) ? 'cookies.ts.ejs' : null,
+      'custom-reporter.ts.ejs',
+      'global-setup.ts.ejs',
+      'global-teardown.ts.ejs',
+      'index.ts.ejs',
+      'logger.ts.ejs',
+      ['api', 'hybrid'].includes(a.preset) ? 'server.ts.ejs' : null,
+      'metadata-builder.ts.ejs',
+      'paths.ts.ejs',
+      'test-runner.ts.ejs',
+    ].filter(Boolean) as string[];
+
+    for (const fileOrFolder of utilsFiles) {
+      await renderAndCopyDir(
+        TPL(`playwright/src/utils/${fileOrFolder}`),
+        path.join(dest, 'src', 'utils'),
+        a,
+      );
+    }
+  });
+
+  // --- Playwright config ---
   await step('Add Playwright config (playwright.config.ts)', async () => {
     await renderAndCopyDir(TPL('playwright/playwright.config.ts.ejs'), dest, a);
   });
 
-  // Presets: web / api / soap / hybrid
+  // --- Preset scaffolding ---
+  // Each preset (web, api, soap, hybrid) maps to specific template folders.
+  // We keep the rendering logic explicit and readable so future presets are
+  // straightforward to add.
   if (a.preset === 'web') {
     await step('Add Web as preset (UI/POM + fixtures)', async () => {
-      await renderAndCopyDir(TPL('playwright/src/pages'), path.join(dest, 'src', 'pages'), a);
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/web'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/index.ts.ejs'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/data/ui'),
-        path.join(dest, 'src', 'data', 'ui'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/data/index.ts.ejs'),
-        path.join(dest, 'src', 'data'),
-        a,
-      );
-      await renderAndCopyDir(TPL('playwright/tests/ui'), path.join(dest, 'tests/ui'), a);
+      const webRenders: Array<[string, string]> = [
+        ['playwright/src/pages', path.join(dest, 'src', 'pages')],
+        ['playwright/src/fixtures/web', path.join(dest, 'src', 'fixtures')],
+        ['playwright/src/fixtures/index.ts.ejs', path.join(dest, 'src', 'fixtures')],
+        ['playwright/test-data/ui', path.join(dest, 'test-data', 'ui')],
+        ['playwright/test-data/index.ts.ejs', path.join(dest, 'test-data')],
+        ['playwright/tests/ui', path.join(dest, 'tests/ui')],
+      ];
+
+      for (const [tpl, to] of webRenders) {
+        await renderAndCopyDir(TPL(tpl), to, a);
+      }
     });
   }
+
   if (a.preset === 'api') {
     await step('Add API as preset (API Server, services, tests and fixtures)', async () => {
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/api'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/index.ts.ejs'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/common/servers'),
-        path.join(dest, 'src', 'servers'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/services/api/'),
-        path.join(dest, 'src', 'services', 'api'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/services/index.ts.ejs'),
-        path.join(dest, 'src', 'services'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/data/api/'),
-        path.join(dest, 'src', 'data', 'api'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/data/index.ts.ejs'),
-        path.join(dest, 'src', 'data'),
-        a,
-      );
-      await renderAndCopyDir(TPL('playwright/tests/api'), path.join(dest, 'tests/api'), a);
+      const apiRenders: Array<[string, string]> = [
+        ['playwright/src/fixtures/api', path.join(dest, 'src', 'fixtures')],
+        ['playwright/src/fixtures/index.ts.ejs', path.join(dest, 'src', 'fixtures')],
+        ['playwright/src/utils/api/', path.join(dest, 'src', 'utils', 'api')],
+        ['playwright/test-data/api/', path.join(dest, 'test-data', 'api')],
+        ['playwright/test-data/index.ts.ejs', path.join(dest, 'test-data')],
+        ['playwright/tests/api', path.join(dest, 'tests/api')],
+      ];
+
+      for (const [tpl, to] of apiRenders) {
+        await renderAndCopyDir(TPL(tpl), to, a);
+      }
     });
   }
+
   if (a.preset === 'soap') {
     await step('Add SOAP preset (WSDL client, services, tests and fixtures)', async () => {
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/soap'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/index.ts.ejs'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/services/soap/'),
-        path.join(dest, 'src', 'services', 'soap'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/services/index.ts.ejs'),
-        path.join(dest, 'src', 'services'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/data/soap'),
-        path.join(dest, 'src', 'data', 'soap'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/data/index.ts.ejs'),
-        path.join(dest, 'src', 'data'),
-        a,
-      );
-      await renderAndCopyDir(TPL('playwright/tests/soap'), path.join(dest, 'tests/soap'), a);
+      const soapRenders: Array<[string, string]> = [
+        ['playwright/src/fixtures/soap', path.join(dest, 'src', 'fixtures')],
+        ['playwright/src/fixtures/index.ts.ejs', path.join(dest, 'src', 'fixtures')],
+        ['playwright/src/utils/soap/', path.join(dest, 'src', 'utils', 'soap')],
+        ['playwright/test-data/soap', path.join(dest, 'test-data', 'soap')],
+        ['playwright/test-data/index.ts.ejs', path.join(dest, 'test-data')],
+        ['playwright/tests/soap', path.join(dest, 'tests/soap')],
+      ];
+
+      for (const [tpl, to] of soapRenders) {
+        await renderAndCopyDir(TPL(tpl), to, a);
+      }
     });
   }
+
   if (a.preset === 'hybrid') {
     await step('Add Hybrid (UI + API + SOAP + Fixtures) as preset', async () => {
-      // Add UI part
-      await renderAndCopyDir(TPL('playwright/src/pages'), path.join(dest, 'src', 'pages'), a);
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/hybrid'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/fixtures/index.ts.ejs'),
-        path.join(dest, 'src', 'fixtures'),
-        a,
-      );
-      await renderAndCopyDir(TPL('playwright/tests/ui'), path.join(dest, 'tests/ui'), a);
-      await renderAndCopyDir(TPL('playwright/tests/api'), path.join(dest, 'tests/api'), a);
-      await renderAndCopyDir(TPL('playwright/tests/soap'), path.join(dest, 'tests/soap'), a);
+      const hybridRenders: Array<[string, string]> = [
+        ['playwright/src/pages', path.join(dest, 'src', 'pages')],
+        ['playwright/src/fixtures/hybrid', path.join(dest, 'src', 'fixtures')],
+        ['playwright/src/fixtures/index.ts.ejs', path.join(dest, 'src', 'fixtures')],
+        ['playwright/src/utils/soap/', path.join(dest, 'src', 'utils', 'soap')],
+        ['playwright/src/utils/api/', path.join(dest, 'src', 'utils', 'api')],
+        ['playwright/tests/ui', path.join(dest, 'tests/ui')],
+        ['playwright/tests/api', path.join(dest, 'tests/api')],
+        ['playwright/tests/soap', path.join(dest, 'tests/soap')],
+      ];
 
-      // Also include API + SOAP artifacts for hybrid (API + SOAP)
-      await renderAndCopyDir(
-        TPL('playwright/src/common/servers'),
-        path.join(dest, 'src', 'servers'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/services/'),
-        path.join(dest, 'src', 'services'),
-        a,
-      );
-      await renderAndCopyDir(
-        TPL('playwright/src/services/index.ts.ejs'),
-        path.join(dest, 'src', 'services'),
-        a,
-      );
+      for (const [tpl, to] of hybridRenders) {
+        await renderAndCopyDir(TPL(tpl), to, a);
+      }
 
-      await renderAndCopyDir(TPL('playwright/src/data'), path.join(dest, 'src', 'data'), a);
-      await renderAndCopyDir(
-        TPL('playwright/src/data/index.ts.ejs'),
-        path.join(dest, 'src', 'data'),
-        a,
-      );
-      // Ensure common data subfolders exist (some CI checkouts omit empty template dirs)
-      await ensureDir(path.join(dest, 'src', 'data', 'api'));
-      await ensureDir(path.join(dest, 'src', 'data', 'soap'));
-      await ensureDir(path.join(dest, 'src', 'data', 'ui'));
+      // Also include test-data (api/soap/ui/index) used by hybrid setups
+      for (const [tpl, to] of [
+        ['playwright/test-data/api', path.join(dest, 'test-data', 'api')],
+        ['playwright/test-data/soap', path.join(dest, 'test-data', 'soap')],
+        ['playwright/test-data/ui', path.join(dest, 'test-data', 'ui')],
+        ['playwright/test-data/index.ts.ejs', path.join(dest, 'test-data')],
+      ]) {
+        await renderAndCopyDir(TPL(tpl), to, a);
+      }
     });
   }
 
-  // Extras: reporters, notifications, CI, husky, zephyr
+  // --- Optional extras: reporters, notifications, CI, husky, zephyr ---
   if (a.reporter === 'allure') {
     await step('Include Allure docs (docs/reporters/allure)', async () => {
       await copyDir(TPL('docs/reporters/allure'), path.join(dest, 'docs/reporters/allure'));
@@ -266,19 +249,28 @@ export async function scaffold(a: Answers) {
     });
   }
 
-  // Finalize package.json with dependencies and scripts
+  // --- Finalize package.json ---
+  // Read the rendered `package.json` produced by templates and merge in
+  // dependencies/devDependencies based on the user's choices.
   const pkgPath = path.join(dest, 'package.json');
   const pkg = JSON.parse((await fs.readFile(pkgPath)).toString());
   let deps: Record<string, string>;
   let devDeps: Record<string, string>;
-  // Dependencies and devDependencies
+
+  // Build dependency lists in a single step so we can present it in the spinner
   await step('Prepare package.json dependencies and scripts', async () => {
     deps = {
       '@playwright/test': '^1.58.1',
       axios: '^1.9.0',
       dotenv: '^16.5.0',
+      // Add `yarn` as a dependency only when user chose yarn as package manager
       yarn: a.packageManager === 'yarn' ? '^1.22.22' : (undefined as any),
     };
+
+    // devDeps includes many optional toolings. We construct the object using
+    // spread syntax so entries are only present when relevant to the chosen
+    // preset/options (e.g. express for API, Allure for reporters, typescript
+    // toolchain when TS/JS selected, etc.).
     devDeps = {
       // core tooling
       '@eslint/json': '^0.12.0',
@@ -304,23 +296,31 @@ export async function scaffold(a: Answers) {
       'winston-daily-rotate-file': '^5.0.0',
       kolorist: '^1.8.0',
       ...(a.preset === 'api' || a.preset === 'hybrid'
-        ? { express: '^5.2.1', '@types/express': '^5.0.6' }
+        ? {
+            // API-related runtime deps and types
+            express: '^5.2.1',
+            '@types/express': '^5.0.6',
+            '@apollo/client': '^3.8.0',
+            graphql: '^16.7.1',
+            'cross-fetch': '^3.1.5',
+          }
         : (undefined as any)),
-      // Add the command-line if user chose Allure
+      // Add Allure reporting utilities unless Monocart was selected
       ...(a.reporter !== 'monocart'
         ? {
             'allure-playwright': '^3.2.1',
             'allure-commandline': '^2.34.1',
           }
         : (undefined as any)),
-      // Add Monocart only when chosen
+      // Monocart reporter only when specifically chosen
       ...(a.reporter === 'monocart'
         ? {
             'monocart-reporter': '^2.9.18',
           }
         : (undefined as any)),
 
-      // TypeScript toolchain (only when TS is chosen)
+      // TypeScript toolchain (present for both `ts` and `js` selections since
+      // repo templates may still rely on types/tools)
       ...(a.language === 'ts' || a.language === 'js'
         ? {
             typescript: '^5.8.3',
@@ -333,6 +333,7 @@ export async function scaffold(a: Answers) {
         : (undefined as any)),
       ...(a.notifications
         ? {
+            // Notification-related packages
             nodemailer: '^7.0.11',
             '@slack/webhook': '^7.0.6',
             '@types/nodemailer': '^7.0.4',
@@ -340,24 +341,30 @@ export async function scaffold(a: Answers) {
         : (undefined as any)),
       ...(a.preset === 'api' || a.preset === 'soap' || a.preset === 'hybrid'
         ? {
+            // JSON schema validation helpers for services/tests
             ajv: '^8.12.0',
             'ajv-formats': '^2.1.1',
           }
         : (undefined as any)),
       ...(a.preset === 'soap' || a.preset === 'hybrid'
         ? {
+            // SOAP parsing/serialization
             'fast-xml-parser': '^5.3.3',
           }
         : (undefined as any)),
     };
   });
 
+  // Apply the dependency changes and write back `package.json`.
   await step('Finalize package.json', async () => {
     pkg.dependencies = { ...(pkg.dependencies ?? {}), ...deps };
+    // Filter out undefined entries from devDeps before merging
     pkg.devDependencies = {
       ...(pkg.devDependencies ?? {}),
       ...Object.fromEntries(Object.entries(devDeps).filter(([, v]) => v)),
     };
+
+    // If husky is requested, add lint-staged and a prepare script
     if (a.husky) {
       pkg['lint-staged'] = {
         '*.{ts,js}': [
@@ -368,13 +375,14 @@ export async function scaffold(a: Answers) {
       pkg.scripts = { ...(pkg.scripts ?? {}), prepare: 'husky' };
     }
 
-    // Reporter-specific scripts (npm vs yarn aware)
+    // Reporter-specific scripts: prefer `yarn` binary when user chose yarn,
+    // otherwise use `npx` so scripts work across environments.
     pkg.scripts = pkg.scripts ?? {};
     const pmBin = a.packageManager === 'yarn' ? 'yarn' : 'npx';
     const xenv = `${pmBin} cross-env`;
 
     if (a.reporter === 'allure') {
-      // Generate & open Allure
+      // Generate & open Allure: note ALLURE_NO_ANALYTICS=1 to avoid telemetry
       pkg.scripts['report:generate'] =
         `${xenv} ALLURE_NO_ANALYTICS=1 allure generate --single-file artifacts/reports/allure-results -o artifacts/reports/allure-report --clean`;
       pkg.scripts['report:open'] =
@@ -387,10 +395,11 @@ export async function scaffold(a: Answers) {
       // Playwright built-in HTML report (npm/yarn aware)
       pkg.scripts['report:open'] = `${pmBin} playwright show-report`;
     }
+
     await writeJSON(pkgPath, pkg);
   });
 
-  // Extra docs
+  // --- Include best-practices docs ---
   await step('Include docs', async () => {
     await copyDir(TPL('docs/best-practices'), path.join(dest, 'docs/best-practices'));
   });

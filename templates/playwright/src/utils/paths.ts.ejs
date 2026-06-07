@@ -34,15 +34,10 @@ export const SECOND_SCREENSHOT_PATH = path.join(
 // Source directories
 export const SRC_DIR = path.join(PROJECT_ROOT, 'src');
 export const CONFIG_DIR = path.join(SRC_DIR, 'configs');
-export const DATA_DIR = path.join(SRC_DIR, 'data');
+export const DATA_DIR = path.join(PROJECT_ROOT, 'test-data');
 export const ENVIRONMENTS_DIR = path.join(SRC_DIR, 'environments');
 export const FIXTURES_DIR = path.join(SRC_DIR, 'fixtures');
-export const HELPERS_DIR = path.join(SRC_DIR, 'helpers');
 export const PAGES_DIR = path.join(SRC_DIR, 'pages');
-export const REPORTERS_DIR = path.join(SRC_DIR, 'reporters');
-export const SERVICES_DIR = path.join(SRC_DIR, 'services');
-export const TOOLS_DIR = path.join(SRC_DIR, 'tools');
-export const NOTIFICATIONS_DIR = path.join(TOOLS_DIR, 'notifications');
 export const UTILS_DIR = path.join(SRC_DIR, 'utils');
 
 // test directories

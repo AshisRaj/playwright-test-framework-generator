@@ -78,25 +78,79 @@ It is recommended to run Linting and syntax validation scripts locally before pu
 
 ## Project Structure and Folder/Files Description
 
-- `docs`: Contains the docs, coding guideline for Typescript.
-- `src`: Contains the src code, files and folders apart from tests.
-  - `configs`: Contains configuration files for the framework, such as environment-specific settings.
-  - `data`: Stores test data files, such as JSON or CSV files, used during test execution.
-  - `environments`: Contains environment-specific configurations, such as URLs or credentials.
-  - `fixtures`: Includes reusable test data or setup/teardown logic for tests.
-  - `pages`: Implements the Page Object Model (POM) for web pages, encapsulating page-specific navigation, elements and actions.
-  - `reporters`: Contains the custom reporter.
-  - `services`: Contains API/SOAP/DB related services and configs.
-  - `servers`: Contains lightweight server for REST APIs.
-  - `utils`: Includes helper functions, utilities, or common modules used across the framework.
-- `tests/`: Contains tests files and folders.
-- `.editorconfig`: Contains the configuration for Editor.
-- `.gitignore`: Contains the list of files and folders to be ignored by git.
-- `.prettierignore`: Contains the list of files/folders Prettier must ignore.
-- `.prettierrc`: Contains the configurations for Prettier.
-- `eslint.config.mjs`: Contains the configurations for the linting rules.
-- `package.json`: Contains the nodejs packages and dependencies list, scripts.
-- `playwright.config.ts`: Contains the playwright configurations.
-- `README.md`: Contains the documentation for the project.
-- `tsconfigs.json`: Contains the compilation configurations for TS.
-- `tests/`: Contains tests files and folders.
+```text
+<%= projectName %>/
+│
+│── .github/
+│ # CI/CD workflows, PR templates, and repo-level automation configs
+│
+│── .husky/
+│ # Git hooks (pre-commit, commit-msg, pre-push)
+│
+│── .vscode/
+│ # Workspace settings & recommended extensions for consistent developer experience
+│
+│── docs/
+│ # Project documentation (coding standards, architecture, review guidelines)
+│
+│── artifacts/
+│ # Runtime-generated outputs (ignored in Git; safe for debugging & analysis)
+│ │── cookies/
+│ │ # Persisted session/auth cookies for reuse in tests
+│ │── reports/
+│ │ # Test execution reports (HTML, JSON, etc.)
+│ │── logs/
+│ │ # Execution logs for debugging and tracing
+│ │── screenshots/
+│ │ # Captured screenshots (failures or checkpoints)
+│ │── temp/
+│ │ # Files write and download during test execution
+│
+│── src/
+│ # Core reusable test framework code (no direct test specs)
+│ │── config/
+│ │ # Centralized framework-level configurations and constants
+│ │── environments/
+│ │ # Environment-specific configurations (dev, qa, staging, prod)
+│ │── fixtures/
+│ │ # Reusable test fixtures (page objects, API clients, setup contexts)
+│ │── pages/
+│ │ # Implements the Page Object Model (POM) for web pages
+│ │── utils/
+│ │ # Shared helpers, utilities, custom reporters, API/GraphQL/SOAP clients
+│
+│── tests/
+│ # Actual test specifications grouped by feature/module
+│
+│── test-data/
+│ # Externalized test data (JSON, CSV, static datasets for data-driven testing)
+│
+│── .editorconfig
+│ # Code style rules enforced across editors (indentation, spacing, encoding)
+│
+│── .gitignore
+│ # Defines files/folders excluded from version control
+│
+│── .prettierignore
+│ # Specifies files excluded from Prettier formatting
+│
+│── .prettierrc
+│ # Prettier configuration (formatting rules like quotes, semicolons, spacing)
+│
+│── README.md
+│ # Project overview, setup instructions, and usage documentation
+│
+│── eslint.config.mjs
+│ # ESLint configuration for code quality, linting, and best practices
+│
+│── package.json
+│ # Project metadata, scripts, dependencies, and tooling configuration
+│
+│── package-lock.json
+│ # Dependency lock file ensuring consistent installations across environments
+│
+│── playwright.config.ts
+│ # Playwright configuration (execution settings, browsers, reporters, retries)
+│
+└── tsconfig.json # TypeScript compiler configuration (paths, strictness, module settings)
+```

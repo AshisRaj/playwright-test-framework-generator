@@ -68,7 +68,7 @@ const reporter: ReporterDescription[] =
 <% if (reporter === "monocart") { %>
   [
     [
-      './src/reporters/custom-reporter.ts',
+      './src/utils/custom-reporter.ts',
       {
         reportMetaData,
       },
@@ -163,7 +163,7 @@ const reporter: ReporterDescription[] =
 <% } else if (reporter === "allure") { %>
   [
     [
-      './src/reporters/custom-reporter.ts',
+      './src/utils/custom-reporter.ts',
       {
         reportMetaData,
       },
@@ -182,7 +182,7 @@ const reporter: ReporterDescription[] =
 <% } else if (reporter === "html") { %>
   [
     [
-      './src/reporters/custom-reporter.ts',
+      './src/utils/custom-reporter.ts',
       {
         reportMetaData,
       },
@@ -192,7 +192,7 @@ const reporter: ReporterDescription[] =
   <% } else { %>
   [
     [
-      './src/reporters/custom-reporter.ts',
+      './src/utils/custom-reporter.ts',
       {
         reportMetaData,
       },

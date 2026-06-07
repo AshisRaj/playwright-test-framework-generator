@@ -1,4 +1,5 @@
-import { APIRequestContext, APIResponse, request as baseRequest, TestInfo } from '@playwright/test';
+import { APIRequestContext, APIResponse, request as baseRequest,
+  expect, TestInfo } from '@playwright/test';
 import { logger } from '@utils';
 <% if (reporter !== 'monocart') { %>
 import { allure } from 'allure-playwright';
@@ -65,6 +66,14 @@ export class ApiClient {
 
   async delete(url: string, apiOptions?: ApiOptions) {
     return this.execute('DELETE', url, undefined, apiOptions);
+  }
+
+  async graphql(url: string, query: string, variables?: unknown, apiOptions?: ApiOptions) {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(apiOptions?.headers ?? {}),
+    };
+    return this.execute('POST', url, { query, variables }, { ...apiOptions, headers });
   }
 
   private async execute(
@@ -206,5 +215,145 @@ export class ApiClient {
           error,
         );
       });
+  }
+
+  // GraphQL Helper Methods for Post Operations
+  private createPostMutation = `
+    mutation CreatePost($input: CreatePostInput!) {
+      createPost(input: $input) {
+        id
+        title
+        body
+        user {
+          id
+          name
+        }
+      }
+    }
+  `;
+
+  private getPostQuery = `
+    query GetPost($id: ID!) {
+      post(id: $id) {
+        id
+        title
+        body
+      }
+    }
+  `;
+
+  private updatePostMutation = `
+    mutation UpdatePost($id: ID!, $input: UpdatePostInput!) {
+      updatePost(id: $id, input: $input) {
+        id
+        title
+        body
+      }
+    }
+  `;
+
+  private deletePostMutation = `
+    mutation DeletePost($id: ID!) {
+      deletePost(id: $id)
+    }
+  `;
+
+  private getCountryQuery = `
+    query GetCountry($code: ID!) {
+      country(code: $code) {
+        code
+        name
+        capital
+        currency
+      }
+    }
+  `;
+
+  async createTestPost(endpoint: string, title: string, bodyText: string): Promise<string> {
+    const variables = { input: { title, body: bodyText } };
+    const response = await this.graphql(endpoint, this.createPostMutation, variables);
+    expect(response.status()).toBe(200);
+
+    const body = (await response.json()) as {
+      data?: {
+        createPost?: { id: string; title: string; body: string };
+      };
+    };
+
+    expect(body.data?.createPost).toBeDefined();
+    expect(body.data?.createPost?.title).toBe(title);
+    expect(body.data?.createPost?.body).toBe(bodyText);
+    return body.data?.createPost?.id as string;
+  }
+
+  async queryPost(
+    endpoint: string,
+    postId: string,
+  ): Promise<{
+    data?: { post?: { id: string; title: string; body: string } };
+  }> {
+    const response = await this.graphql(endpoint, this.getPostQuery, { id: postId });
+    expect(response.status()).toBe(200);
+    return response.json() as Promise<{
+      data?: { post?: { id: string; title: string; body: string } };
+    }>;
+  }
+
+  async updateTestPost(
+    endpoint: string,
+    postId: string,
+    title: string,
+    body: string,
+  ): Promise<void> {
+    const updateVariables = {
+      id: postId,
+      input: { title, body },
+    };
+    const updateResponse = await this.graphql(endpoint, this.updatePostMutation, updateVariables);
+    expect(updateResponse.status()).toBe(200);
+
+    const updateBody = (await updateResponse.json()) as {
+      data?: {
+        updatePost?: { id: string; title: string; body: string };
+      };
+    };
+    expect(updateBody.data?.updatePost).toBeDefined();
+    expect(updateBody.data?.updatePost?.title).toBe(title);
+    expect(updateBody.data?.updatePost?.body).toBe(body);
+  }
+
+  async deleteTestPost(endpoint: string, postId: string): Promise<void> {
+    const deleteResponse = await this.graphql(endpoint, this.deletePostMutation, {
+      id: postId,
+    });
+    expect(deleteResponse.status()).toBe(200);
+    const deleteBody = (await deleteResponse.json()) as {
+      data?: {
+        deletePost?: boolean;
+      };
+    };
+    expect(deleteBody.data?.deletePost).toBe(true);
+  }
+
+  async queryCountry(
+    endpoint: string,
+    code: string,
+  ): Promise<{
+    data?: {
+      country?: { code: string; name: string; capital?: string; currency?: string };
+    };
+  }> {
+    const response = await this.graphql(endpoint, this.getCountryQuery, { code });
+    expect(response.status()).toBe(200);
+
+    const body = (await response.json()) as {
+      data?: {
+        country?: { code: string; name: string; capital?: string; currency?: string };
+      };
+    };
+
+    expect(body.data).toBeDefined();
+    expect(body.data?.country).toBeDefined();
+    return body;
   }
 }

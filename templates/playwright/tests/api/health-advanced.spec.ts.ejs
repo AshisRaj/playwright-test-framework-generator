@@ -1,6 +1,6 @@
 import { expect, test } from '@fixtures';
 import { APIResponse } from '@playwright/test';
-import { validateApiResponse } from '@services';
+import { validateApiResponse } from '@utils';
 
 test.describe('mocked Health API - Advanced', () => {
   test(

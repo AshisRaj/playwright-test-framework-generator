@@ -146,7 +146,7 @@ function expectFiles(root: string, c: any) {
   expect(exists(path.join(root, 'src', 'utils', 'global-setup.ts'))).toBe(true);
   expect(exists(path.join(root, 'src', 'utils', 'global-teardown.ts'))).toBe(true);
   // custom reporter always included with runner=playwright
-  expect(exists(path.join(root, 'src', 'reporters', 'custom-reporter.ts'))).toBe(true);
+  expect(exists(path.join(root, 'src', 'utils', 'custom-reporter.ts'))).toBe(true);
 }
 
 describe('init (matrix)', async () => {
@@ -226,10 +226,10 @@ describe('init (matrix)', async () => {
 
       expect(cfg).toMatch(/reportMetaData = \s*new MetadataBuilder()/);
       // custom reporter also present
-      expect(cfg).toMatch(/\.\/src\/reporters\/custom-reporter\.ts/);
+      expect(cfg).toMatch(/\.\/src\/utils\/custom-reporter\.ts/);
 
       // custom reporter file exists
-      expect(exists(path.join(root, 'src', 'reporters', 'custom-reporter.ts'))).toBe(true);
+      expect(exists(path.join(root, 'src', 'utils', 'custom-reporter.ts'))).toBe(true);
       // path safety
       expect(cfg).toMatch(/PROJECT_ROOT|fileURLToPath/);
 

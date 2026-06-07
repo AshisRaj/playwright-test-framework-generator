@@ -2,7 +2,7 @@ import { calculatorSoapData, countryInfoSoapData, numberConversionSoapData, calc
 import { Fixtures } from '@fixtures';
 import type { TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
-import { SoapClient, type SoapOptions } from '@services';
+import { SoapClient, type SoapOptions } from '@utils';
 
 export const test = baseTest.extend<Fixtures>({
   // Allow tests to optionally provide SOAP client options via `test.use({ soapServiceOptions: { ... } })`

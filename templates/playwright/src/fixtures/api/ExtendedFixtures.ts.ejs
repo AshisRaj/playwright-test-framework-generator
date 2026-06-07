@@ -12,11 +12,21 @@ import {
 import { Fixtures } from '@fixtures';
 import type { TestInfo } from '@playwright/test';
 import { expect as baseExpect, test as baseTest } from '@playwright/test';
-import { ApiClient, type ApiOptions } from '@services';
+import { ApiClient,
+  ApolloClient,
+  type ApiOptions, } from '@utils';
 
 export const test = baseTest.extend<Fixtures>({
   // Allow tests to optionally provide API client options via `test.use({ apiServiceOptions: { ... } })`
   apiServiceOptions: async ({}, use: (opts: ApiOptions) => Promise<void>) => {
+    await use({});
+  },
+
+  // Allow tests to optionally provide Apollo client options via `test.use({ apolloClientOptions: { ... } })`
+  apolloClientOptions: async (
+    {},
+    use: (opts: { uri?: string; headers?: Record<string, string> }) => Promise<void>,
+  ) => {
     await use({});
   },
 
@@ -41,6 +51,22 @@ export const test = baseTest.extend<Fixtures>({
       pollingTimeoutMs: apiServiceOptions?.pollingTimeoutMs,
     };
     const client = new ApiClient(options, testInfo);
+    await use(client);
+    await client.dispose();
+  },
+
+  // Provide ApolloClient wrapper as a fixture that tests can use directly
+  apolloClient: async (
+    {
+      apolloClientOptions,
+    }: { apolloClientOptions: { uri?: string; headers?: Record<string, string> } },
+    use: (client: ApolloClient) => Promise<void>,
+  ) => {
+    const uri =
+      apolloClientOptions?.uri ||
+      process.env.APOLLO_GRAPHQL_ENDPOINT ||
+      'https://apollo-fullstack-tutorial.herokuapp.com/graphql';
+    const client = new ApolloClient(uri, apolloClientOptions?.headers);
     await use(client);
     await client.dispose();
   },

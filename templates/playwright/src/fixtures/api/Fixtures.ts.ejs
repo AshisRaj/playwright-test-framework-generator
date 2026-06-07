@@ -1,4 +1,4 @@
-import type { ApiClient, ApiOptions } from '@services';
+import type { ApiClient, ApiOptions, ApolloClient } from '@utils';
 import {
   contactsData,
   profilesData,
@@ -14,6 +14,11 @@ import {
 export type Fixtures = {
   apiService: ApiClient;
   apiServiceOptions: ApiOptions;
+  apolloClient: ApolloClient;
+  apolloClientOptions: {
+    uri?: string;
+    headers?: Record<string, string>;
+  };
 
   // API test data
   apiData: {

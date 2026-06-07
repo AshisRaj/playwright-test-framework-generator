@@ -1,8 +1,17 @@
+<% if (['web', 'hybrid'].includes(preset)) { %>
+export * from './cookies';
+<% } %>
+export * from './logger';
+export * from './metadata-builder';
+export * from './paths';
+
 <% if (["api", "hybrid"].includes(preset)) { %>
 export * from './api/ApiClient';
 export * from './api/ApiResponseValidator';
 export * from './api/ApiSchemaRegistry';
+export * from './api/ApolloClient';
 <% } %>
+
 <% if (["soap", "hybrid"].includes(preset)) { %>
 export * from './soap/SoapClient';
 export * from './soap/SoapParser';

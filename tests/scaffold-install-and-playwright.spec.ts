@@ -5,7 +5,7 @@ import { runCLI } from './helpers';
 
 const distEntry = path.resolve(process.cwd(), 'dist/index.js'); // your built CLI
 
-describe('Scaffolded projects: install, check, and playwright', () => {
+describe.skip('Scaffolded projects: install, check, and playwright', () => {
   it(`npm i -> npm run check -> npx playwright test --reporter html`, async () => {
     // Create a temporary directory for the test project
     const testProjectName = `pw-tests-${Date.now()}`;

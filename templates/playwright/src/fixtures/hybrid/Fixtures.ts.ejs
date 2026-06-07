@@ -1,7 +1,7 @@
 import { CheckoutDataset } from '@data';
 import type { CartPage, CheckoutPage, HomePage, InventoryPage, LoginPage } from '@pages';
 import { Page } from '@playwright/test';
-import type { ApiClient, ApiOptions, SoapClient, SoapOptions } from '@services';
+import type { ApiClient, ApiOptions, ApolloClient, SoapClient, SoapOptions } from '@utils';
 
 import {
   calculatorSoapData,
@@ -28,9 +28,15 @@ import {
 export type Fixtures = {
   // Services
   apiService: ApiClient;
-  soapService: SoapClient;
   apiServiceOptions: ApiOptions;
+  apolloClient: ApolloClient;
+  apolloClientOptions: {
+    uri?: string;
+    headers?: Record<string, string>;
+  };
+  soapService: SoapClient;
   soapServiceOptions: SoapOptions;
+
 
   // API test data
   apiData: {

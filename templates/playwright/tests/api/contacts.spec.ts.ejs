@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { expect, test } from '@fixtures';
 import { APIResponse } from '@playwright/test';
-import { validateApiResponse } from '@services';
+import { validateApiResponse } from '@utils';
 
 let contactId: number;
 

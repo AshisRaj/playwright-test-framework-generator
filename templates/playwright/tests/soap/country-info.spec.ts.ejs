@@ -1,5 +1,5 @@
 import { expect, test } from '@fixtures';
-import { validateSoapResponse } from '@services';
+import { validateSoapResponse } from '@utils';
 
 test.use({
   soapServiceOptions: {
