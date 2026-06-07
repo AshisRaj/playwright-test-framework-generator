@@ -9,6 +9,8 @@
     "playwright-test-framework-generator": "./bin/cli.js"
   },
   "files": [
+    "src",
+    "tests",
     "dist",
     "bin",
     "templates",
