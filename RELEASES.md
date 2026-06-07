@@ -22,4 +22,5 @@ All notable changes to this project will be documented in this file.
 - Moved the `data` folder out of `src` so it sits parallel to `src`, also renamed to test-data (industry standard).
 - Reorganized files and folders under `templates/playwright`.
 - Optimized `src/scaffold.ts` and added comments/JSDoc across files under `src` folder.
+- Added support for GraphQL and Apollo GraphQL client calls and tests.
 - Documentation updates, and miscellaneous bug fixes and test repairs.
