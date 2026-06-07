@@ -129,7 +129,7 @@ export async function askQuestions(projectName: string, flags: any): Promise<Ans
       message: 'Preset?',
       choices: [
         { name: 'Web (UI/POM + Fixtures)', value: 'web' },
-        { name: 'API (APIClient + Fixtures)', value: 'api' },
+        { name: 'API (APIClient + GraphQLClient + ApolloClient + Fixtures)', value: 'api' },
         { name: 'Hybrid (UI + API + SOAP + Fixtures)', value: 'hybrid' },
         { name: 'SOAP (SOAPClient + Fixtures)', value: 'soap' },
       ],
