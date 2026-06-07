@@ -18,8 +18,8 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.1] - 2026-05-07
 
-- Minimized the number of sub-folders under `src` from 10 to 5 to reduce context switching.
-- Moved the `data` folder out of `src` so it sits parallel to `src` (industry standard).
+- Minimized the number of sub-folders under `src` from 10 to 5 to minimize context switching.
+- Moved the `data` folder out of `src` so it sits parallel to `src`, also renamed to test-data (industry standard).
 - Reorganized files and folders under `templates/playwright`.
-- Optimized `src/scaffold.ts` and added comments/JSDoc across `src` files.
+- Optimized `src/scaffold.ts` and added comments/JSDoc across files under `src` folder.
 - Documentation updates, and miscellaneous bug fixes and test repairs.
