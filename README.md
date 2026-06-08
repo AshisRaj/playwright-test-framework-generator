@@ -60,24 +60,53 @@ These capabilities are designed to get teams running reliable Playwright test su
 
 Below is a concise description of the main files and folders in this repository. Use these locations when you want to modify the scaffold behavior, templates, or example projects.
 
-### src (primary implementation)
+## Project Structure
 
-- `src/`: Core implementation of the CLI and scaffolding logic. Contains the entry points, helpers and orchestration code used by the `playwright-test-framework-generator` command.
-- `src/index.ts`: CLI entry — parses arguments, configures options, and delegates to the scaffold flow.
-- `src/files.ts`: File-system helpers — create directories, copy/write files, and apply file-level transformations.
-- `src/prompts.ts`: Interactive prompt definitions and validation used during `init` to collect project choices from the user.
-- `src/render.ts`: Template rendering utilities (EJS/placeholder replacement) and helpers that inject variables into templates before writing.
-- `src/scaffold.ts`: High-level scaffolding engine — applies templates, runs post-generation steps (like installing deps), and coordinates file creation.
-- `src/*`: Other utility modules and small helpers live here (logging, validation, config loaders). Keep core behaviour in `src/` when modifying generator logic.
-
-### templates (scaffold sources)
-
-- `templates/`: Template repository used by the generator. Templates are written as EJS or placeholder-enabled files and are copied + rendered into the target project.
-- `templates/base/`: Base project template used for new projects. Contains common files such as `env.example`, `package.json.ejs`, `tsconfig.json`, `README.md.ejs`, and example config files.
-- `templates/ci/`: CI pipeline templates. Subfolders include `github/` and `gitlab/` with `*.yml.ejs` workflow templates (e.g. `github-ci.yml.ejs`) — these are rendered based on the `--ci` option.
-- `templates/playwright/` and `templates/extras/`: Example Playwright configs, reporters, helpers, and optional extras that can be included when scaffolding (e.g. reporter stubs, notification scripts). These provide ready-to-use test structure and example pages/fixtures.
-  - `templates/extras/presets/`: contains additional preset packs such as `web`, `api`, `hybrid`, and `soap` (SOAP/ XML API helpers). Add new presets here when extending the generator.
-- `templates/*`: Templates may include nested folders for `playwright/src/`, `playwright/tests/`, `husky/`, and `docs/` to give scaffolded projects a complete starting layout.
+```text
+playwright-test-framework-generator/
+├── src/                          # Core implementation of the CLI
+│                                 # and scaffolding logic
+│   ├── index.ts                    # CLI entry point — parses arguments,
+│   │                               # configures options, and delegates
+│   │                               # to scaffold flow
+│   ├── files.ts                  # File-system helpers — create directories,
+│   │                               # copy/write files, and apply
+│   │                               # file-level transformations
+│   ├── prompts.ts                # Interactive prompts and validation
+│   │                               # used during initialization to
+│   │                               # collect project preferences
+│   ├── render.ts                 # Template rendering utilities
+│   │                               # (EJS/placeholder replacement)
+│   │                               # and variable injection helpers
+│   ├── scaffold.ts               # High-level scaffolding engine —
+│   │                               # applies templates, runs post-
+│   │                               # generation steps, and coordinates
+│   │                               # file creation
+├── templates/                    # Framework templates used to
+│                                   # generate starter projects
+│
+├── examples/                     # Example generated projects or
+│                                   # sample implementations
+│
+├── tests/                        # Unit/integration tests for
+│                                   # generator functionality
+│
+├── .editorconfig                 # Editor formatting consistency
+│                                   # (indentation, spacing, encoding)
+├── .gitignore                    # Files/folders excluded from Git
+├── .prettierignore               # Files excluded from formatting
+├── .prettierrc                   # Prettier formatting rules
+├── eslint.config.mjs             # ESLint configuration for
+│                                   # linting and code quality
+├── package.json                  # Project metadata, scripts,
+│                                   # dependencies, and CLI definition
+├── package-lock.json             # Locked dependency versions for
+│                                   # reproducible installs
+├── tsconfig.json                 # TypeScript compiler configuration
+├── README.md                     # Project overview, setup,
+│                                   # usage, and contribution guide
+└── LICENSE                       # Open-source license information
+```
 
 How to customize templates:
 
